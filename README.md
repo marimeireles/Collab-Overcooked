@@ -34,14 +34,14 @@ The easiest way to test whether the environment is installed correctly is to use
 If you can output the environmental visualization map normally, the agents' normal output content, and run through 3 time steps without any errors, then your environment and agent configuration are successful. This will take you about 1.5 minutes, depending on the speed of your connection to OpenAI.
 
 ### Configure the Open-source LLMs
-
+TODO
 
 ### Evaluation
-
+TODO
 
 ## Modify the Environment
-
+TODO
 
 ## Q&A
-
+TODO
 
