@@ -14,7 +14,6 @@ dtw-python
 sentencepiece
 scikit-learn
 plotly
-#Li interface
 aiohttp
 gym
 httpx==0.27.2
