@@ -159,8 +159,7 @@ roadmap.md
 src/batch_run.sh
 src/batch_run.sh
 
-src/eval_result/
 
 src/embedding_cache.json
-src/data
+
 
