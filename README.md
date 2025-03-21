@@ -1,8 +1,8 @@
 <div align="center">
   <h1> Collab-Overcooked </h1>
   
-  ![Benchmark Version](https://img.shields.io/badge/Data%20Version-1.0.0-blue.svg?style=for-the-badge&logo=appveyor)
-  [![License: MIT](https://img.shields.io/crates/l/Ap?style=for-the-badge)](https://github.com/YusaeMeow/Collab-Overcooked/blob/main/LICENSE)
+  ![Benchmark Version](https://img.shields.io/badge/Benchmark%20Version-1.0.0-blue.svg?style=for-the-badge)
+  [![License: MIT](https://img.shields.io/crates/l/MIT?style=for-the-badge)](https://github.com/YusaeMeow/Collab-Overcooked/blob/main/LICENSE)
   [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge)](https://github.com/YusaeMeow/Collab-Overcooked/issues/new)
 </div>
 
