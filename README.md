@@ -1,4 +1,10 @@
-# Collab-Overcooked: Benchmarking and Evaluating Large Language Models as Collaborative Agents
+<div align="center">
+  <h1> Collab-Overcooked </h1>
+  
+  ![Benchmark Version](https://img.shields.io/badge/Data%20Version-1.0.0-blue.svg?style=for-the-badge&logo=appveyor)
+  [![License: MIT](https://img.shields.io/crates/l/Ap?style=for-the-badge)](https://github.com/YusaeMeow/Collab-Overcooked/blob/main/LICENSE)
+  [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge)](https://github.com/YusaeMeow/Collab-Overcooked/issues/new)
+</div>
 
 We propose a new LLM-powered Multi-Agent System (LLM-MAS) benchmark, Collab-Overcooked, built on the popular Overcooked-AI game with more applicable and challenging tasks in interactive environments. Collab-Overcooked extends existing benchmarks from two novel perspectives. First, it provides a multi-agent framework supporting diverse tasks and objectives and encourages collaboration through natural language communication. Second, it introduces a spectrum of process-oriented evaluation metrics to assess the fine-grained collaboration capabilities of different LLM agents, a dimension often overlooked in prior work.
 
@@ -55,9 +61,6 @@ The environment settings and logic are stored in the `Collab-Overcooked/lib/over
 - To add more tasks (such as additional recipes or ingredients), you only need to modify the corresponding layout files.
 - If you need to add new interactive elements, ensure that you update the environment logic accordingly.
 
-
-## Q&A
-TODO
 
 ## Reference
 ```bibtex
