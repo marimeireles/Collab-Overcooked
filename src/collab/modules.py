@@ -185,186 +185,95 @@ class Module(object):
         rethink=False,
         map="",
     ):
-        # example should be sorted by its embedding with current input
+        # First check if this is a human model
+        if "human" in self.model:
+            # Human model logic
+            receiver = self.name
+            if receiver == "Chef":
+                receiver = "agent0"
+            elif receiver == "Assistant":
+                receiver = "agent1"
+            else:
+                raise ValueError("Invalid agent name!")
 
-        if "gpt" in self.model or "deepseek" in self.model.lower():
-            openai.api_key = openai_key
+            human_message = self.current_user_message["content"]
+            if "DO NOT COMMUNICATE WITH YOUR TEAMMATE" in human_message:
+                human_message = human_message[
+                    human_message.find("DO NOT COMMUNICATE WITH YOUR TEAMMATE :\n")
+                    + len("DO NOT COMMUNICATE WITH YOUR TEAMMATE :\n") :
+                ]
+                human_message = human_message[
+                    : human_message.find(
+                        "Below are the failed and analysis history"
+                    )
+                ]
+            response = output_to_port(
+                receiver, human_message, map=map, recipe=recipe, error=error
+            )
+            encoder_name = "cl100k_base"  # Default encoder for human models
 
-        # Open source models
+        # Then check for local models (including Qwen)
+        elif "/" in self.model:  # This indicates a local model path
+            # Prepare messages for the model
+            messages = self.query_messages(rethink)
+            
+            # Initialize client with local server
+            client = OpenAI(
+                api_key="not-needed",  # vLLM doesn't need an API key
+                base_url=self.local_server_api
+            )
+            
+            # Make the request
+            response = client.chat.completions.create(
+                model=self.model,  # Use the model name directly
+                messages=messages,
+                temperature=temperature,
+            )
+            encoder_name = "cl100k_base"  # Default encoder for local models
+
+        # Finally check for OpenAI models
+        elif any(model in self.model for model in ["gpt-3.5", "gpt-4", "text-davinci"]):
+            messages = self.query_messages(rethink)
+            client = OpenAI(api_key=key)
+            if "gpt-3.5" in self.model or "gpt-4" in self.model:
+                response = client.chat.completions.create(
+                    model=self.model, messages=messages, temperature=temperature
+                )
+                encoder_name = "gpt-3.5-turbo" if "gpt-3.5" in self.model else "gpt-4"
+            else:  # text-davinci-003
+                prompt = convert_messages_to_prompt(messages)
+                response = client.completions.create(
+                    model=self.model,
+                    prompt=prompt,
+                    stop=stop,
+                    temperature=temperature,
+                    max_tokens=256,
+                )
+                encoder_name = "p50k_base"
+            time.sleep(1)
         else:
-            openai.api_base = self.local_server_api
-            openai.api_key = "token-abc123"
-
-        rec = self.K
-        messages = self.query_messages(rethink)
-        self.cache_list = self.get_cache()
-
-        if trace == False and not rethink:
-            messages[len(messages) - 1][
-                "content"
-            ] += " Based on the failure explanation and scene description, analyze and plan again."
-
-        self.K = rec
-        response = None
-
-        get_response = False
-        retry_count = 0
-
-        while not get_response:
-            if retry_count > 1:
-                rprint("[red][ERROR][/red]: Query GPT failed for over 3 times!")
-                self.current_user_message["content"] = self.current_user_message[
-                    "content"
-                ][:-40]
-                return "", 0
-            try:
-                if "human" in self.model:
-                    if messages[-1]["content"].find("Suppose you are a Chef") != -1:
-                        receiver = "agent0"
-                    elif (
-                        messages[-1]["content"].find("Suppose you are a Assistant")
-                        != -1
-                    ):
-                        receiver = "agent1"
-                    else:
-                        raise ValueError("Invalide role")
-                    # truncate message for user
-                    input_part = messages[-1]["content"].find("<input>\n") + len(
-                        "<input>\n"
-                    )
-                    human_message = messages[-1]["content"][input_part:]
-                    recipe = None
-                    if receiver == "agent0":
-                        recipe_start = messages[-1]["content"].find(
-                            "<Recipe need to know>:\n"
-                        ) + len("<Recipe need to know>:\n")
-                        recipe_end = messages[-1]["content"].find("**Skill**")
-                        recipe = messages[-1]["content"][recipe_start:recipe_end]
-                    # find error
-                    error = None
-                    error_start = human_message.find(
-                        "DO NOT COMMUNICATE WITH YOUR TEAMMATE :\n"
-                    )
-                    if error_start != -1:
-                        error = human_message[
-                            error_start
-                            + len("DO NOT COMMUNICATE WITH YOUR TEAMMATE :\n") :
-                        ]
-                        human_message = human_message[
-                            : human_message.find(
-                                "Below are the failed and analysis history"
-                            )
-                        ]
-                    response = output_to_port(
-                        receiver, human_message, map=map, recipe=recipe, error=error
-                    )
-                    # response = listen_to_server()
-                    encoder_name = "gpt-3.5-turbo"
-
-                elif "gpt-3.5-turbo-0125" in self.model:
-                    client = OpenAI(api_key=openai.api_key)
-                    response = client.chat.completions.create(
-                        model=self.model, messages=messages, temperature=temperature
-                    )
-                    time.sleep(1)
-                    encoder_name = "gpt-3.5-turbo"
-
-                elif self.model in ["text-davinci-003"]:
-                    prompt = convert_messages_to_prompt(messages)
-                    response = openai.Completion.create(
-                        model=self.model,
-                        prompt=prompt,
-                        stop=stop,
-                        temperature=temperature,
-                        max_tokens=256,
-                    )
-                    time.sleep(1)
-                    encoder_name = "p50k_base"
-
-                elif "gpt-4o" == self.model:
-                    client = OpenAI(api_key=openai.api_key)
-                    response = client.chat.completions.create(
-                        model=self.model,  # home_path+"/models/"+self.model,
-                        messages=messages,
-                        temperature=temperature,
-                    )
-                    response = response.to_dict()
-                    time.sleep(1)
-                    encoder_name = "gpt-4"
-
-                    encoder_name = "gpt-4"
-
-                elif "deepseek" in self.model.lower():
-                    client = OpenAI(api_key=openai.api_key, base_url=openai.api_base)
-                    response = client.chat.completions.create(
-                        model=self.model, messages=messages, temperature=temperature
-                    )
-                    time.sleep(1)
-                    encoder_name = "gpt-4"
-
-                # Open source model, use vLLM
-                else:
-                    client = OpenAI(api_key=openai.api_key, base_url=openai.api_base)
-                    response = client.chat.completions.create(
-                        model=self.model_dirname
-                        + self.model,  # home_path+"/models/"+self.model,
-                        messages=messages,
-                        temperature=temperature,
-                    )
-                    encoder_name = "llama3"
-
-                get_response = True
-
-            except Exception as e:
-                retry_count += 1
-                rprint("[red][OPENAI ERROR][/red]:", e)
-                time.sleep(1)
+            raise ValueError(f"Unsupported model type: {self.model}")
 
         rs = self.parse_response(response)
-        # count the number of tokens
+        
+        # Count tokens based on model type
         if "gpt" in encoder_name:
             encoding = tiktoken.encoding_for_model(encoder_name)
             tokens = encoding.encode(rs)
             token_count = len(tokens)
-        if "llama3" in encoder_name:
+        else:
+            # Use llama tokenizer for all other models
             tokenizer = AutoTokenizer.from_pretrained(
-                "../lib/llama_tokenizer", local_files_only=True
+                "../lib/llama_tokenizer", 
+                local_files_only=True
             )
             tokens = tokenizer.encode(rs)
             token_count = len(tokens)
+        
         return rs, token_count
 
     def parse_response(self, response):
-        if self.model == "claude3_sonnet":
-            return response["content"][0]["text"]
-        elif self.model in ["text-davinci-003"]:
-            return response["choices"][0]["text"]
-        elif self.model in [
-            "gpt-3.5-turbo-16k",
-            "gpt-3.5-turbo-0301",
-            "gpt-3.5-turbo",
-            "gpt-4o",
-        ]:
-            return response["choices"][0]["message"]["content"]
-        elif self.model in [
-            "gpt-4",
-            "gpt-4-0314",
-            "gpt-4o-2024-05-13",
-            "gpt-4o",
-            "gpt-o1mini",
-        ]:
-            return response["choices"][0]["content"]
-
-        elif self.model in [
-            "deepseek-reasoner",
-            "deepseek-chat",
-            "deepseek-ai/DeepSeek-R1",
-            "deepseek-ai/DeepSeek-V3",
-            "DeepSeek-R1",
-        ]:
-            return response.choices[0].message.content
-
-        elif "human" in self.model:
+        if "human" in self.model:
             response_template = (
                 "{role} analysis: [NOTHING]\n{role} plan: {plan}\n{role} say: {say}"
             )
@@ -380,7 +289,10 @@ class Module(object):
                 "{say}", response["say"] if response["say"] != "" else "[NOTHING]"
             )
             return response_template
+        elif "text-davinci" in self.model:
+            return response.choices[0].text
         else:
+            # For all other models (GPT and local), extract content from response
             return response.choices[0].message.content
 
     def restrict_dialogue(self):

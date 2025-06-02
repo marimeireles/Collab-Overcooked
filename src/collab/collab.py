@@ -75,12 +75,14 @@ class LLMPair(object):
 
 
 class LLMAgents(LLMPair):
+    # Define basic ingredients that don't require a recipe file
+    BASIC_INGREDIENTS = {"apple", "carrot", "onion", "potato", "tofu"}
 
     def __init__(
         self,
         mlam,
         layout,
-        model="gpt-3.5-turbo-0301",
+        model="gpt-3.5-turbo-0301",  # Default is OpenAI model
         model_dirname="~/",
         local_server_api="http://localhost:8000/v1",
         retrival_method="recent_k",
@@ -208,7 +210,7 @@ class LLMAgents(LLMPair):
   5. Use `deliver_soup()."""
         assistant_workflow = """The usual workflow for the Assistant is:  
 - 1. Ask the Chef for guidance, since you do not have the recipe and need the Chef to help you plan.  
-- 2. Follow the Chef’s instructions unless they are incorrect. For example, if the Chef requests a utensil that is not available on your side, you should refuse and inform him. """
+- 2. Follow the Chef's instructions unless they are incorrect. For example, if the Chef requests a utensil that is not available on your side, you should refuse and inform him. """
         #  -1. Communicate with the chef for instruction and don't make your own plans.\n\
         #  -2. Follow the instructions given by Chef unless his instruction is wrong. For example, if the utensil he wants you to use in not in your side, you should refuse and tell him.\n"
         # load recipe
@@ -797,18 +799,56 @@ class LLMAgents(LLMPair):
         return function_name, params
 
     def load_recipe(self):
-        if self.order in self.recipe.keys():
-            warnings.warn("Prompt has load the recipe")
+        # If this order has already been loaded, return immediately.
+        if self.order in self.recipe:
+            warnings.warn("Prompt has already loaded the recipe", UserWarning)
             return
-        recipe_name_list = os.listdir(PROMPT_DIR + "/recipe/")
+
+        # If the order is a single ingredient that does not require a recipe file,
+        # simply record an empty placeholder (or handle it in whatever way you prefer).
+        if self.order in LLMAgents.BASIC_INGREDIENTS:
+            # e.g. store an empty string or a default "no‐recipe" marker
+            self.recipe[self.order] = ""
+            return
+
+        # Otherwise, proceed to look for a recipe file under prompts/recipe/
+        recipe_dir = os.path.join(PROMPT_DIR, "recipe")
+        recipe_name_list = os.listdir(recipe_dir)
+
         recipe_filename = ""
-        for r in recipe_name_list:
-            r_name = r[2:-4]
-            if self.order == r_name:
-                recipe_filename = r
+        for fname in recipe_name_list:
+            base, ext = os.path.splitext(fname)
+            if ext.lower() != ".txt":
+                continue
+            # Split on the first underscore: "<index>_<recipe_name>"
+            parts = base.split("_", 1)
+            if len(parts) != 2:
+                continue
+            _, name_str = parts
+            if self.order == name_str:
+                recipe_filename = fname
                 break
-        with open(PROMPT_DIR + "/recipe/" + recipe_filename) as r:
-            self.recipe[self.order] = r.read()
+
+        if not recipe_filename:
+            available = [
+                os.path.splitext(f)[0].split("_", 1)[1]
+                for f in recipe_name_list
+                if os.path.splitext(f)[1].lower() == ".txt" and "_" in f
+            ]
+            raise FileNotFoundError(
+                f"No recipe file found for order='{self.order}'. "
+                f"Available recipes: {available}"
+            )
+
+        full_path = os.path.join(recipe_dir, recipe_filename)
+        if not os.path.isfile(full_path):
+            raise FileNotFoundError(
+                f"Expected a file at '{full_path}', but it does not exist or is not a file."
+            )
+
+        with open(full_path, "r") as f:
+            self.recipe[self.order] = f.read()
+
 
     def parse_ml_action(self, action_string):
         ml_action = ""

@@ -126,21 +126,38 @@ def main(variant):
         
         for alg in [p0_algo, p1_algo]:
             if alg == "LLMPair":
-                if mode!="human":
-                    assert variant['gpt_model']!=None, print(f'you should choose a gpt model')
-                if mode == "OpenSource":
-                    assert os.path.exists(variant['model_dirname']) is True, print(f"you should input right open-source model absolute path")
-                print(f"\n----Use {variant['gpt_model']}----\n")
+                # Model selection and validation
+                if mode != "human":
+                    if not variant['gpt_model']:
+                        raise ValueError("You must specify a model using --gpt_model when not in human mode")
+                    
+                    # Validate model path for open source models
+                    if mode == "OpenSource":
+                        if not os.path.exists(variant['model_dirname']):
+                            raise ValueError(f"Model directory not found: {variant['model_dirname']}")
+                        print(f"Using open source model from: {variant['model_dirname']}")
+                
+                # Handle human mode
                 if variant['gpt_model'] == "human":
-                    assert check_port_in_use(variant["local_server_api"]) is True,print(f"port {variant['local_server_api']} is busy")
+                    if not check_port_in_use(variant["local_server_api"]):
+                        raise ValueError(f"Port {variant['local_server_api']} is not in use")
                     change_port(variant["local_server_api"])
-                gpt_model = variant['gpt_model']
-                model_dirname = variant['model_dirname']
-                local_server_api = variant['local_server_api']
-                retrival_method = variant['retrival_method']
-                K = variant['K']
-                agent = make_agent(alg, mdp, layout, model=gpt_model, model_dirname=model_dirname,local_server_api=local_server_api,
-                                   retrival_method=retrival_method, K=K,actor=actor_list[actor_num])
+                    print("Running in human mode with local server")
+                
+                print(f"\n----Using model: {variant['gpt_model']}----\n")
+                
+                # Initialize agent with model parameters
+                agent = make_agent(
+                    alg, 
+                    mdp, 
+                    layout,
+                    model=variant['gpt_model'],
+                    model_dirname=variant['model_dirname'],
+                    local_server_api=variant['local_server_api'],
+                    retrival_method=variant['retrival_method'],
+                    K=variant['K'],
+                    actor=actor_list[actor_num]
+                )
             else:
                 agent = make_agent(alg, mdp, layout)
             agents_list.append(agent)
