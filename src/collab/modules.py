@@ -185,7 +185,7 @@ class Module(object):
         rethink=False,
         map="",
     ):
-        # First check if this is a human model
+        # Check if human is playing
         if "human" in self.model:
             # Human model logic
             receiver = self.name
@@ -210,28 +210,29 @@ class Module(object):
             response = output_to_port(
                 receiver, human_message, map=map, recipe=recipe, error=error
             )
-            encoder_name = "cl100k_base"  # Default encoder for human models
+            encoder_name = "llama3"  # Use llama3 tokenizer for human models
 
-        # Then check for local models (including Qwen)
+        # If not human mode, then LLM mode
         elif "/" in self.model:  # This indicates a local model path
             # Prepare messages for the model
             messages = self.query_messages(rethink)
             
-            # Initialize client with local server
+            # Initialize vLLM client (using OpenAI-compatible API format)
             client = OpenAI(
-                api_key="not-needed",  # vLLM doesn't need an API key
+                api_key="not-needed",  # vLLM implements OpenAI API format
                 base_url=self.local_server_api
             )
             
-            # Make the request
+            # Make the request to local vLLM server
             response = client.chat.completions.create(
                 model=self.model,  # Use the model name directly
                 messages=messages,
                 temperature=temperature,
             )
-            encoder_name = "cl100k_base"  # Default encoder for local models
+            encoder_name = "llama3"  # Use llama3 tokenizer for local models
 
         # Finally check for OpenAI models
+        # TODO: this needs to be expanded to contain more OpenAI models
         elif any(model in self.model for model in ["gpt-3.5", "gpt-4", "text-davinci"]):
             messages = self.query_messages(rethink)
             client = OpenAI(api_key=key)
@@ -258,11 +259,12 @@ class Module(object):
         
         # Count tokens based on model type
         if "gpt" in encoder_name:
+            # Use tiktoken for GPT models
             encoding = tiktoken.encoding_for_model(encoder_name)
             tokens = encoding.encode(rs)
             token_count = len(tokens)
         else:
-            # Use llama tokenizer for all other models
+            # Use llama tokenizer for all other models (including local models via vLLM)
             tokenizer = AutoTokenizer.from_pretrained(
                 "../lib/llama_tokenizer", 
                 local_files_only=True
@@ -273,7 +275,39 @@ class Module(object):
         return rs, token_count
 
     def parse_response(self, response):
-        if "human" in self.model:
+        """
+        Parse the response from different model types.
+        Handles OpenAI models (GPT-3.5, GPT-4, text-davinci), local models via vLLM,
+        and human models.
+        """
+        if self.model == "claude3_sonnet":
+            return response["content"][0]["text"]
+        elif self.model in ["text-davinci-003"]:
+            return response["choices"][0]["text"]
+        elif self.model in [
+            "gpt-3.5-turbo-16k",
+            "gpt-3.5-turbo-0301",
+            "gpt-3.5-turbo",
+            "gpt-4o",
+        ]:
+            return response["choices"][0]["message"]["content"]
+        elif self.model in [
+            "gpt-4",
+            "gpt-4-0314",
+            "gpt-4o-2024-05-13",
+            "gpt-4o",
+            "gpt-o1mini",
+        ]:
+            return response["choices"][0]["content"]
+        elif self.model in [
+            "deepseek-reasoner",
+            "deepseek-chat",
+            "deepseek-ai/DeepSeek-R1",
+            "deepseek-ai/DeepSeek-V3",
+            "DeepSeek-R1",
+        ]:
+            return response.choices[0].message.content
+        elif "human" in self.model:
             response_template = (
                 "{role} analysis: [NOTHING]\n{role} plan: {plan}\n{role} say: {say}"
             )
@@ -292,7 +326,7 @@ class Module(object):
         elif "text-davinci" in self.model:
             return response.choices[0].text
         else:
-            # For all other models (GPT and local), extract content from response
+            # For all other models (including local models via vLLM)
             return response.choices[0].message.content
 
     def restrict_dialogue(self):

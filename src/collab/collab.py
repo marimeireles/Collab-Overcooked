@@ -804,10 +804,9 @@ class LLMAgents(LLMPair):
             warnings.warn("Prompt has already loaded the recipe", UserWarning)
             return
 
-        # If the order is a single ingredient that does not require a recipe file,
-        # simply record an empty placeholder (or handle it in whatever way you prefer).
+        # If the order is a single ingredient that does not require a recipe file
+        # simply record an empty placeholder
         if self.order in LLMAgents.BASIC_INGREDIENTS:
-            # e.g. store an empty string or a default "no‐recipe" marker
             self.recipe[self.order] = ""
             return
 
