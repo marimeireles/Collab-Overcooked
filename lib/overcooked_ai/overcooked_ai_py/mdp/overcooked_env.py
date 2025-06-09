@@ -1,10 +1,9 @@
 import gym
-import tqdm
 import numpy as np
-from overcooked_ai_py.utils import mean_and_std_err
+import tqdm
 from overcooked_ai_py.mdp.actions import Action
 from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
-
+from overcooked_ai_py.utils import mean_and_std_err
 
 DEFAULT_ENV_PARAMS = {"horizon": 400}
 

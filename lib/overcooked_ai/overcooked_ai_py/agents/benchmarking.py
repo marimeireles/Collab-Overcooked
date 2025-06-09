@@ -1,28 +1,18 @@
-import json, copy
+import copy
+import json
+
 import numpy as np
-
-from overcooked_ai_py.utils import (
-    save_pickle,
-    load_pickle,
-    cumulative_rewards_from_rew_list,
-    save_as_json,
-    load_from_json,
-)
-from overcooked_ai_py.planning.planners import NO_COUNTERS_PARAMS, MediumLevelPlanner
+from overcooked_ai_py.agents.agent import (AgentPair, CoupledPlanningAgent,
+                                           GreedyHumanModel, RandomAgent)
 from overcooked_ai_py.mdp.layout_generator import LayoutGenerator
-from overcooked_ai_py.agents.agent import (
-    AgentPair,
-    CoupledPlanningAgent,
-    RandomAgent,
-    GreedyHumanModel,
-)
-from overcooked_ai_py.mdp.overcooked_mdp import (
-    OvercookedGridworld,
-    Action,
-    OvercookedState,
-)
 from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
-
+from overcooked_ai_py.mdp.overcooked_mdp import (Action, OvercookedGridworld,
+                                                 OvercookedState)
+from overcooked_ai_py.planning.planners import (NO_COUNTERS_PARAMS,
+                                                MediumLevelPlanner)
+from overcooked_ai_py.utils import (cumulative_rewards_from_rew_list,
+                                    load_from_json, load_pickle, save_as_json,
+                                    save_pickle)
 
 DEFAULT_TRAJ_KEYS = [
     "ep_observations",
@@ -262,7 +252,7 @@ class AgentEvaluator(object):
         Displays ith trajectory of trajectories (in standard format)
         interactively in a Jupyter notebook.
         """
-        from ipywidgets import widgets, interactive_output
+        from ipywidgets import interactive_output, widgets
 
         states = trajectories["ep_observations"][traj_idx]
         joint_actions = trajectories["ep_actions"][traj_idx]

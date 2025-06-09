@@ -1,4 +1,5 @@
 import os
+
 from overcooked_ai_py.utils import load_dict_from_file
 
 LAYOUTS_DIR = os.path.dirname(os.path.abspath(__file__))

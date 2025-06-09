@@ -1,17 +1,18 @@
-import numpy as np
 import os
+from collections import defaultdict
 
-from overcooked_ai_py.mdp.actions import Direction, Action
-from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld, OvercookedState
-from overcooked_ai_py.agents.agent import GreedyHumanModel, StayAgent, RandomAgent
-from overcooked_ai_py.agents.agent import AgentFromPolicy, AgentPair
-from overcooked_ai_py.planning.planners import MediumLevelPlanner, NO_COUNTERS_PARAMS
+import numpy as np
+from overcooked_ai_py.agents.agent import (AgentFromPolicy, AgentPair,
+                                           GreedyHumanModel, RandomAgent,
+                                           StayAgent)
+from overcooked_ai_py.mdp.actions import Action, Direction
+from overcooked_ai_py.mdp.overcooked_mdp import (OvercookedGridworld,
+                                                 OvercookedState)
+from overcooked_ai_py.planning.planners import (NO_COUNTERS_PARAMS,
+                                                MediumLevelPlanner)
 from overcooked_ai_py.utils import load_dict_from_file, load_pickle
 
-
 from collab.collab import LLMAgents
-
-from collections import defaultdict
 from collab.modules import EMBEDDING_MODEL
 
 
@@ -60,8 +61,9 @@ def make_agent(alg: str, mdp, layout, **gptargs):
 # make the example into embedding for retrieval
 def get_example_embedding(example_path, save_path=""):
     input = ""
-    import openai
     import os
+
+    import openai
     import pandas as pd
 
     key = ""

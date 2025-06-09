@@ -1,28 +1,22 @@
 import pickle
 import time
 import unittest
-import numpy as np
 
-from overcooked_ai_py.agents.agent import (
-    Agent,
-    AgentPair,
-    FixedPlanAgent,
-    CoupledPlanningAgent,
-    GreedyHumanModel,
-    CoupledPlanningPair,
-    EmbeddedPlanningAgent,
-    RandomAgent,
-)
-from overcooked_ai_py.mdp.actions import Direction, Action
-from overcooked_ai_py.mdp.overcooked_mdp import (
-    OvercookedGridworld,
-    OvercookedState,
-    PlayerState,
-    ObjectState,
-)
-from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
-from overcooked_ai_py.planning.planners import MediumLevelPlanner, NO_COUNTERS_PARAMS
+import numpy as np
+from overcooked_ai_py.agents.agent import (Agent, AgentPair,
+                                           CoupledPlanningAgent,
+                                           CoupledPlanningPair,
+                                           EmbeddedPlanningAgent,
+                                           FixedPlanAgent, GreedyHumanModel,
+                                           RandomAgent)
 from overcooked_ai_py.agents.benchmarking import AgentEvaluator
+from overcooked_ai_py.mdp.actions import Action, Direction
+from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
+from overcooked_ai_py.mdp.overcooked_mdp import (ObjectState,
+                                                 OvercookedGridworld,
+                                                 OvercookedState, PlayerState)
+from overcooked_ai_py.planning.planners import (NO_COUNTERS_PARAMS,
+                                                MediumLevelPlanner)
 
 np.random.seed(42)
 

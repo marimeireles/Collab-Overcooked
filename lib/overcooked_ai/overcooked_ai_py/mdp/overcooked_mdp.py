@@ -1,17 +1,15 @@
-import itertools, copy
-import numpy as np
-import re
+import copy
+import itertools
 import random
+import re
+from collections import Counter, defaultdict
 from functools import reduce
-from collections import defaultdict, Counter
-from overcooked_ai_py.utils import (
-    pos_distance,
-    load_from_json,
-    OvercookedException,
-    classproperty,
-)
+
+import numpy as np
 from overcooked_ai_py.data.layouts import read_layout_dict
 from overcooked_ai_py.mdp.actions import Action, Direction
+from overcooked_ai_py.utils import (OvercookedException, classproperty,
+                                    load_from_json, pos_distance)
 
 FULL = 1
 PARTIALLY_FULL = 2

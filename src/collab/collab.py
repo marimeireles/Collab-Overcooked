@@ -1,23 +1,26 @@
-import itertools, os, json, re
-from collections import defaultdict
+import copy
+import itertools
+import json
+import os
+import queue
+import re
+import sys
+import warnings
+from collections import defaultdict, deque
 from typing import Union
+
 import numpy as np
 import pkg_resources
-from collections import deque
-import sys
-import copy
-from .modules import Module, statistics_dict, turn_statistics_dict
 from overcooked_ai_py.mdp.actions import Action, Direction
-from overcooked_ai_py.planning.search import find_path
-from overcooked_ai_py.planning.search import get_intersect_counter
-from overcooked_ai_py.planning.search import query_counter_states
-from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld, OvercookedState
-import queue
-import warnings
-import copy
-
+from overcooked_ai_py.mdp.overcooked_mdp import (OvercookedGridworld,
+                                                 OvercookedState)
+from overcooked_ai_py.planning.search import (find_path, get_intersect_counter,
+                                              query_counter_states)
 from rich import print as rprint
+
 from collab.modules import if_two_sentence_similar_meaning
+
+from .modules import Module, statistics_dict, turn_statistics_dict
 
 cwd = os.getcwd()
 openai_key_file = os.path.join(cwd, "openai_key.txt")

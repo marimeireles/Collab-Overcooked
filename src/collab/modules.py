@@ -1,19 +1,19 @@
-import openai
-from rich import print as rprint
+import os
+import sys
 import time
 from typing import Union
-from .utils import convert_messages_to_prompt, retry_with_exponential_backoff
-import pandas as pd
-import os
+
 import numpy as np
-from scipy import spatial
-import sys
-import os
-import tiktoken
-from transformers import AutoTokenizer
 import openai
+import pandas as pd
+import tiktoken
 from openai import OpenAI
-from .web_util import output_to_port, listen_to_server, username_record
+from rich import print as rprint
+from scipy import spatial
+from transformers import AutoTokenizer
+
+from .utils import convert_messages_to_prompt, retry_with_exponential_backoff
+from .web_util import listen_to_server, output_to_port, username_record
 
 cwd = os.getcwd()
 gpt4_key_file = os.path.join(cwd, "openai_key.txt")

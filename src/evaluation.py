@@ -1,14 +1,15 @@
-import time
 import datetime
-import os, re
 import json
-import datetime
+import os
+import re
+import time
 from argparse import ArgumentParser
+from distutils.util import strtobool
+
 import pandas as pd
 from rich import print as rprint
 
 from eval_utils import Evaluation, ExpLog
-from distutils.util import strtobool
 
 models = ["gpt-4o"]
 

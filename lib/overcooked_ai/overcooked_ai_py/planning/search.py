@@ -1,9 +1,11 @@
+import copy
+import heapq
 import sys
-import heapq, time
+import time
+
 import numpy as np
 import scipy.sparse
 from overcooked_ai_py.mdp.actions import Action
-import copy
 
 
 # return a list of visitable positions
@@ -343,6 +345,7 @@ class SearchNode(object):
 
 
 class Graph(object):
+
     def __init__(self, dense_adjacency_matrix, encoder, decoder, debug=False):
         """
         Each graph node is distinguishable by a key, encoded by the encoder into

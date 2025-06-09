@@ -1,10 +1,7 @@
-from overcooked_ai_py.mdp.actions import Direction, Action
-from overcooked_ai_py.mdp.overcooked_mdp import (
-    OvercookedState,
-    ObjectState,
-    PlayerState,
-)
 from overcooked_ai_py.agents.benchmarking import AgentEvaluator
+from overcooked_ai_py.mdp.actions import Action, Direction
+from overcooked_ai_py.mdp.overcooked_mdp import (ObjectState, OvercookedState,
+                                                 PlayerState)
 
 n, s = Direction.NORTH, Direction.SOUTH
 e, w = Direction.EAST, Direction.WEST

@@ -1,13 +1,15 @@
 # Example modifications to remove OpenAI dependencies
 
-import numpy as np
-from sentence_transformers import SentenceTransformer
-from scipy import spatial
 import re
+
+import numpy as np
+from scipy import spatial
+from sentence_transformers import SentenceTransformer
 
 
 # Replace OpenAI embeddings with local sentence transformer
 class OpenSourceModule:
+
     def __init__(self):
         # Load a local embedding model
         self.embedding_model = SentenceTransformer(

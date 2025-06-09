@@ -1,5 +1,5 @@
 from IPython.display import Image, display
-from ipywidgets import interactive, IntSlider
+from ipywidgets import IntSlider, interactive
 
 
 def show_image_in_ipython(data, *args, **kwargs):

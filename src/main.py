@@ -1,21 +1,21 @@
-import os
 import json
+import os
 import time
+import warnings
 from argparse import ArgumentParser
 from distutils.util import strtobool
-import warnings
+
+import config
 import importlib_metadata
-
-from rich import print as rprint
-
-from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
-from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
 from overcooked_ai_py.agents.agent import AgentGroup
 from overcooked_ai_py.mdp.actions import Action
+from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
+from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
+from rich import print as rprint
 
 from collab.modules import statistics_dict
-from collab.web_util import output_to_port, check_port_in_use, change_port
-from utils import make_agent, combine_statistic_dict
+from collab.web_util import change_port, check_port_in_use, output_to_port
+from utils import combine_statistic_dict, make_agent
 
 
 def boolean_argument(value):
@@ -306,6 +306,13 @@ if __name__ == "__main__":
         type=str,
         default="data",
         help="save directory of LLM statistics",
+    )
+
+    parser.add_argument(
+        "--openai",
+        type=boolean_argument,
+        default=False,
+        help="Enable OpenAI API usage for embeddings and evaluations",
     )
 
     args = parser.parse_args()

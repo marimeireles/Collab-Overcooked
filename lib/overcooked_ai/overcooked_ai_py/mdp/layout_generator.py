@@ -1,8 +1,7 @@
 import numpy as np
-from overcooked_ai_py.utils import rnd_int_uniform, rnd_uniform
 from overcooked_ai_py.mdp.actions import Action, Direction
 from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
-
+from overcooked_ai_py.utils import rnd_int_uniform, rnd_uniform
 
 EMPTY = " "
 COUNTER = "X"

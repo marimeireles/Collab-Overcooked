@@ -1,6 +1,14 @@
-import io, json, pickle, pstats, cProfile, os, uuid, tempfile
-import numpy as np
+import cProfile
+import io
+import json
+import os
+import pickle
+import pstats
+import tempfile
+import uuid
 from pathlib import Path
+
+import numpy as np
 
 # I/O
 
@@ -136,6 +144,7 @@ def cumulative_rewards_from_rew_list(rews):
 
 
 class classproperty(property):
+
     def __get__(self, cls, owner):
         return classmethod(self.fget).__get__(None, owner)()
 

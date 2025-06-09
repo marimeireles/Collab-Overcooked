@@ -1,6 +1,6 @@
-from collab import web_util
 from argparse import ArgumentParser
 
+from collab import web_util
 
 if __name__ == "__main__":
 

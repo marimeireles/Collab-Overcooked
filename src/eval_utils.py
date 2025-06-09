@@ -1,31 +1,25 @@
-from overcooked_ai_py.utils import load_dict_from_file
-from overcooked_ai_py.data.layouts import LAYOUTS_DIR, read_layout_dict
-from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
-from rich import print as rprint
+import bisect
+import glob
+import json
+import os
+import pickle
 import re
 import time
-
-import os
-import json
+from collections import Counter, defaultdict
+from datetime import datetime
 
 import numpy as np
-import pandas as pd
-import glob
 import openai
-from openai import OpenAI
-import pickle
-from collections import Counter
-
-from sklearn.metrics.pairwise import cosine_similarity
-
+import pandas as pd
 import plotly.graph_objects as go
-from scipy.special import expit
-
 from dtw import dtw, dtwPlot, stepPattern, warp, warpArea, window
-import bisect
-from collections import defaultdict
-
-from datetime import datetime
+from openai import OpenAI
+from overcooked_ai_py.data.layouts import LAYOUTS_DIR, read_layout_dict
+from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
+from overcooked_ai_py.utils import load_dict_from_file
+from rich import print as rprint
+from scipy.special import expit
+from sklearn.metrics.pairwise import cosine_similarity
 
 cwd = os.getcwd()
 
@@ -65,14 +59,16 @@ def get_embedding_from_openai(content):
     return response.data[0].embedding
 
 
-def get_embedding_with_cache(content):
+def get_embedding_with_cache(content, use_openai=True):
     """
     Get the embedding of the content, read it directly if it is already in the cache, otherwise get it and cache it through the API.
     """
     if content in embedding_cache:
         return np.array(embedding_cache[content])
     else:
-        embedding = get_embedding_from_openai(content)  # Call API to get embed
+        embedding = get_embedding_from_openai(
+            content, use_openai
+        )  # Call API to get embed
         embedding_cache[content] = embedding
         # Write the new embed to the cache file
         with open(EMBEDDING_CACHE_PATH, "w") as f:
@@ -80,7 +76,13 @@ def get_embedding_with_cache(content):
         return np.array(embedding)
 
 
-def compute_and_save_embeddings(exp_log, embedding_file="embedding_data.pkl"):
+def compute_and_save_embeddings(
+    exp_log, embedding_file="embedding_data.pkl", use_openai=True
+):
+    if not use_openai:
+        print("Warning: OpenAI API is disabled. Skipping embedding computation.")
+        return {}, {}
+
     coop_message_action_pair_embedding = {}
     coop_message_action_pair = {}  # Used to store raw message and action content
 
@@ -103,8 +105,8 @@ def compute_and_save_embeddings(exp_log, embedding_file="embedding_data.pkl"):
             # Action History Extraction
             coop_action = str(action_history[timestamp][1])[1:-1]
 
-            coop_message_embedding = get_embedding_from_openai(coop_message)
-            coop_action_embedding = get_embedding_from_openai(coop_action)
+            coop_message_embedding = get_embedding_from_openai(coop_message, use_openai)
+            coop_action_embedding = get_embedding_from_openai(coop_action, use_openai)
 
             coop_message_action_pair_embedding[unique_timestamp] = {
                 "message": coop_message_embedding,
@@ -161,6 +163,7 @@ def calculate_similarity(embedding1, embedding2):
 
 
 class Reference:
+
     def __init__(self, order_name_list, action_encoding={}) -> None:
         self.order_name_list = order_name_list
         self.reference_seq = self.get_recipe_reference()
@@ -242,6 +245,7 @@ class Reference:
 
 
 class ExpLog:
+
     def __init__(self, log_dir):
         self.log_dir = log_dir
         self.log_data_successed = []
@@ -559,6 +563,7 @@ class ExpLog:
 
 
 class Evaluation:
+
     def __init__(
         self,
         order_name_list=[],
@@ -567,11 +572,13 @@ class Evaluation:
         recipe=None,
         layout_name="new_env",
         exp_log=None,
+        use_openai=True,
         **kwargs,
     ):
         """
         recipe: the recipe need to measure similarity
         """
+        self.use_openai = use_openai
         self.mdp = OvercookedGridworld.from_layout_name(layout_name)
         self.action_space = action_space
 
@@ -910,7 +917,13 @@ class Evaluation:
 
         return sim_seq_1 - sim_seq_2
 
-    def get_action_similarity_with_cache(self, content, agent_id, similarity=0.9):
+    def get_action_similarity_with_cache(
+        self, content, agent_id, similarity=0.9, use_openai=True
+    ):
+        if not use_openai:
+            print("Warning: OpenAI API is disabled. Cannot compute action similarity.")
+            return None
+
         # Loading or updating the embedding cache for content and actions
         try:
             with open(EMBEDDING_CACHE_PATH, "r") as f:
@@ -936,7 +949,7 @@ class Evaluation:
             if action in action_embedding_cache:
                 action_embedding = np.array(action_embedding_cache[action])
             else:
-                action_embedding = get_embedding_from_openai(action)
+                action_embedding = get_embedding_from_openai(action, use_openai)
                 action_embedding_cache[action] = action_embedding
                 new_embedding_action_list = True
 
@@ -949,7 +962,7 @@ class Evaluation:
         if content in embedding_cache:
             content_embedding = np.array(embedding_cache[content])
         else:
-            content_embedding = get_embedding_from_openai(content)
+            content_embedding = get_embedding_from_openai(content, use_openai)
             content_embedding = np.array(content_embedding)
             embedding_cache[content] = content_embedding.tolist()
 
@@ -1377,7 +1390,7 @@ class Evaluation:
                     else:
                         # Here can adjust the sensitivity of action matching
                         pass
-                        # result_temp = self.get_action_similarity_with_cache(request_action_one, begin_agent)
+                        # result_temp = self.get_action_similarity_with_cache(request_action_one, begin_agent, use_openai=self.use_openai)
                         # if result_temp is not None:
                         #     request_action_processed.append(result_temp)
 
@@ -1391,7 +1404,7 @@ class Evaluation:
                     else:
                         # Here can adjust the sensitivity of action matching
                         pass
-                        # result_temp = self.get_action_similarity_with_cache(request_action_one, begin_agent)
+                        # result_temp = self.get_action_similarity_with_cache(request_action_one, begin_agent, use_openai=self.use_openai)
                         # if result_temp is not None:
                         #     request_action_processed.append(result_temp)
 

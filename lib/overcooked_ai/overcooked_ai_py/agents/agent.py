@@ -1,18 +1,12 @@
-import sys
-import itertools
-import numpy as np
 import copy
-from overcooked_ai_py.mdp.actions import Action, Direction
-
-# from overcooked_ai_py.planning.planners import Heuristic
-from overcooked_ai_py.planning.search import SearchTree, find_path
-from overcooked_ai_py.planning.search import find_path
-
-import numpy as np
+import itertools
 import sys
 
+import numpy as np
 # import tiktoken
 from overcooked_ai_py.mdp.actions import Action, Direction
+# from overcooked_ai_py.planning.planners import Heuristic
+from overcooked_ai_py.planning.search import SearchTree, find_path
 
 
 class Agent(object):
