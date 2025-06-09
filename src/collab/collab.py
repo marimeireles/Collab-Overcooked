@@ -848,7 +848,6 @@ class LLMAgents(LLMPair):
         with open(full_path, "r") as f:
             self.recipe[self.order] = f.read()
 
-
     def parse_ml_action(self, action_string):
         ml_action = ""
         action, params = self.parse_params_in_action(action_string)

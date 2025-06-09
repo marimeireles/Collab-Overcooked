@@ -203,9 +203,7 @@ class Module(object):
                     + len("DO NOT COMMUNICATE WITH YOUR TEAMMATE :\n") :
                 ]
                 human_message = human_message[
-                    : human_message.find(
-                        "Below are the failed and analysis history"
-                    )
+                    : human_message.find("Below are the failed and analysis history")
                 ]
             response = output_to_port(
                 receiver, human_message, map=map, recipe=recipe, error=error
@@ -216,13 +214,13 @@ class Module(object):
         elif "/" in self.model:  # This indicates a local model path
             # Prepare messages for the model
             messages = self.query_messages(rethink)
-            
+
             # Initialize vLLM client (using OpenAI-compatible API format)
             client = OpenAI(
                 api_key="not-needed",  # vLLM implements OpenAI API format
-                base_url=self.local_server_api
+                base_url=self.local_server_api,
             )
-            
+
             # Make the request to local vLLM server
             response = client.chat.completions.create(
                 model=self.model,  # Use the model name directly
@@ -256,7 +254,7 @@ class Module(object):
             raise ValueError(f"Unsupported model type: {self.model}")
 
         rs = self.parse_response(response)
-        
+
         # Count tokens based on model type
         if "gpt" in encoder_name:
             # Use tiktoken for GPT models
@@ -266,12 +264,11 @@ class Module(object):
         else:
             # Use llama tokenizer for all other models (including local models via vLLM)
             tokenizer = AutoTokenizer.from_pretrained(
-                "../lib/llama_tokenizer", 
-                local_files_only=True
+                "../lib/llama_tokenizer", local_files_only=True
             )
             tokens = tokenizer.encode(rs)
             token_count = len(tokens)
-        
+
         return rs, token_count
 
     def parse_response(self, response):

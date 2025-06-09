@@ -1,19 +1,26 @@
 import itertools
 
+
 class Direction(object):
     """
     The four possible directions a player can be facing.
     """
-    
+
     NORTH = (0, -1)
     SOUTH = (0, 1)
-    EAST  = (1, 0)
-    WEST  = (-1, 0)
+    EAST = (1, 0)
+    WEST = (-1, 0)
     ALL_DIRECTIONS = INDEX_TO_DIRECTION = [NORTH, SOUTH, EAST, WEST]
-    DIRECTION_TO_INDEX = { a:i for i, a in enumerate(INDEX_TO_DIRECTION) }
-    OPPOSITE_DIRECTIONS = { NORTH: SOUTH, SOUTH: NORTH, EAST: WEST, WEST: EAST }
-    #todo
-    DIRECTION_TO_NAME = { d:name for d, name in zip([NORTH, SOUTH, EAST, WEST], ["NORTH", "SOUTH", "EAST", "WEST"])}
+    DIRECTION_TO_INDEX = {a: i for i, a in enumerate(INDEX_TO_DIRECTION)}
+    OPPOSITE_DIRECTIONS = {NORTH: SOUTH, SOUTH: NORTH, EAST: WEST, WEST: EAST}
+    # todo
+    DIRECTION_TO_NAME = {
+        d: name
+        for d, name in zip(
+            [NORTH, SOUTH, EAST, WEST], ["NORTH", "SOUTH", "EAST", "WEST"]
+        )
+    }
+
     @staticmethod
     def get_adjacent_directions(direction):
         """Returns the directions within 90 degrees of the given direction.
@@ -24,7 +31,7 @@ class Direction(object):
             return [Direction.EAST, Direction.WEST]
         elif direction in [Direction.EAST, Direction.WEST]:
             return [Direction.NORTH, Direction.SOUTH]
-        raise ValueError('Invalid direction: %s' % direction)
+        raise ValueError("Invalid direction: %s" % direction)
 
 
 class Action(object):
@@ -36,20 +43,26 @@ class Action(object):
     """
 
     STAY = (0, 0)
-    INTERACT = 'interact'
+    INTERACT = "interact"
     INTERACT_WITH_PARM = "interact"
-    ALL_ACTIONS = INDEX_TO_ACTION = Direction.INDEX_TO_DIRECTION + [STAY, INTERACT, INTERACT_WITH_PARM]
-    INDEX_TO_ACTION_INDEX_PAIRS = [v for v in itertools.product(range(len(INDEX_TO_ACTION)), repeat=2)]
-    ACTION_TO_INDEX = { a:i for i, a in enumerate(INDEX_TO_ACTION) }
+    ALL_ACTIONS = INDEX_TO_ACTION = Direction.INDEX_TO_DIRECTION + [
+        STAY,
+        INTERACT,
+        INTERACT_WITH_PARM,
+    ]
+    INDEX_TO_ACTION_INDEX_PAIRS = [
+        v for v in itertools.product(range(len(INDEX_TO_ACTION)), repeat=2)
+    ]
+    ACTION_TO_INDEX = {a: i for i, a in enumerate(INDEX_TO_ACTION)}
     MOTION_ACTIONS = Direction.ALL_DIRECTIONS + [STAY]
-    ACTION_TO_CHAR = { 
+    ACTION_TO_CHAR = {
         Direction.NORTH: "↑",
         Direction.SOUTH: "↓",
         Direction.EAST: "→",
         Direction.WEST: "←",
         STAY: "stay",
         INTERACT: "interact",
-        INTERACT_WITH_PARM: "interact"
+        INTERACT_WITH_PARM: "interact",
     }
 
     @staticmethod

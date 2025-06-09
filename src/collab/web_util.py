@@ -36,9 +36,10 @@ async def handler(websocket, path):
 
 
 async def broadcast(data):
-    if connected_clients: 
+    if connected_clients:
         message = json.dumps(data)
         await asyncio.wait([client.send(message) for client in connected_clients])
+
 
 async def send_message(data):
     if connected_clients:

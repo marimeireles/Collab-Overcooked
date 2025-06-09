@@ -119,9 +119,13 @@ def combine_statistic_dict(dict1, dict2, map, score):
     rs["actions"].append(dict2["actions"][0])
     rs["map"] = map
     rs["statistical_data"]["score"] = score
-    rs["statistical_data"]["communication"][1] = dict2["statistical_data"]["communication"][1]
+    rs["statistical_data"]["communication"][1] = dict2["statistical_data"][
+        "communication"
+    ][1]
     rs["statistical_data"]["error"][1] = dict2["statistical_data"]["error"][1]
-    rs["statistical_data"]["error_correction"][1] = dict2["statistical_data"]["error_correction"][1]
+    rs["statistical_data"]["error_correction"][1] = dict2["statistical_data"][
+        "error_correction"
+    ][1]
 
     rs["content"]["observation"][1] = dict2["content"]["observation"][1]
     rs["content"]["reflection"][1] = dict2["content"]["reflection"][1]

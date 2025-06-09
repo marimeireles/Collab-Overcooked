@@ -1,0 +1,134 @@
+{
+    "total_timestamp": [
+        0
+    ],
+    "total_order_finished": [],
+    "total_score": 0,
+    "total_action_list": [
+        [],
+        []
+    ],
+    "content": [
+        {
+            "timestamp": 0,
+            "order_list": [
+                "boiled_egg"
+            ],
+            "actions": [
+                "wait(1)",
+                "wait(1)"
+            ],
+            "map": "X       X       X       P       X       \n\nI               X       \u21910      X       \n\nC       \u21911      X               X       \n\nD               X               O       \n\nX       B       X       S       X       \n\n",
+            "statistical_data": {
+                "score": 0,
+                "communication": [
+                    {
+                        "call": 0,
+                        "turn": [],
+                        "token": []
+                    },
+                    {
+                        "call": 0,
+                        "turn": [],
+                        "token": []
+                    }
+                ],
+                "error": [
+                    {
+                        "format_error": {
+                            "error_num": 2,
+                            "error_message": [
+                                "\n\nYou did not create correct plan part last time, now please remember to add plan according to the format of example strictly!Below is the history:<BEGAIN>\nSuccessful Action History: []\nLessons from Past Failures\n[]\nChef space:pot0  oven0  counter \nAssistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser\nOrder:boiled_egg\nScene 0: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states\n\nYour last response is :\n\n<END>Now please re",
+                                "\n\nYou did not create correct plan part last time, now please remember to add plan according to the format of example strictly!Below is the history:<BEGAIN>\n\n\nYou did not create correct plan part last time, now please remember to add plan according to the format of example strictly!Below is the history:<BEGAIN>\nSuccessful Action History: []\nLessons from Past Failures\n[]\nChef space:pot0  oven0  counter \nAssistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser\nOrder:boiled_egg\nScene 0: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states\n\nYour last response is :\n\n<END>Now please re\n\nYour last response is :\n\n<END>Now please re"
+                            ]
+                        },
+                        "validator_error": {
+                            "error_num": 0,
+                            "error_message": []
+                        }
+                    },
+                    {
+                        "format_error": {
+                            "error_num": 2,
+                            "error_message": [
+                                "\n\nYou did not create correct plan part last time, now please remember to add plan according to the format of example strictly!Below is the history:<BEGAIN>\nSuccessful Action History: []\nLessons from Past Failures\n[]\nChef space:pot0  oven0  counter \nAssistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser\nOrder:boiled_egg\nScene 0: <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [] <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Assistant>. Their states\n\nYour last response is :\n\n<END>Now please re",
+                                "\n\nYou did not create correct plan part last time, now please remember to add plan according to the format of example strictly!Below is the history:<BEGAIN>\n\n\nYou did not create correct plan part last time, now please remember to add plan according to the format of example strictly!Below is the history:<BEGAIN>\nSuccessful Action History: []\nLessons from Past Failures\n[]\nChef space:pot0  oven0  counter \nAssistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser\nOrder:boiled_egg\nScene 0: <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [] <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Assistant>. Their states\n\nYour last response is :\n\n<END>Now please re\n\nYour last response is :\n\n<END>Now please re"
+                            ]
+                        },
+                        "validator_error": {
+                            "error_num": 0,
+                            "error_message": []
+                        }
+                    }
+                ],
+                "error_correction": [
+                    {
+                        "format_correction": {
+                            "correction_num": 2,
+                            "correction_tokens": [
+                                0,
+                                0
+                            ]
+                        },
+                        "validator_correction": {
+                            "correction_num": 0,
+                            "reflection_obtain": [],
+                            "correction_tokens": []
+                        }
+                    },
+                    {
+                        "format_correction": {
+                            "correction_num": 2,
+                            "correction_tokens": [
+                                0,
+                                0
+                            ]
+                        },
+                        "validator_correction": {
+                            "correction_num": 0,
+                            "reflection_obtain": [],
+                            "correction_tokens": []
+                        }
+                    }
+                ]
+            },
+            "content": {
+                "observation": [
+                    "Successful Action History: []\nLessons from Past Failures\n[]\nChef space:pot0  oven0  counter \nAssistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser\nOrder:boiled_egg\nScene 0: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states are as follows: counters have nothing.\n",
+                    "Successful Action History: []\nLessons from Past Failures\n[]\nChef space:pot0  oven0  counter \nAssistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser\nOrder:boiled_egg\nScene 0: <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [] <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Assistant>. Their states are as follows: counters have nothing.\n"
+                ],
+                "reflection": [
+                    [],
+                    []
+                ],
+                "content": [
+                    [
+                        {
+                            "agent": 0,
+                            "analysis": "",
+                            "say": "[NOTHING]",
+                            "plan": ""
+                        }
+                    ],
+                    [
+                        {
+                            "agent": 1,
+                            "analysis": "",
+                            "say": "[NOTHING]",
+                            "plan": ""
+                        }
+                    ]
+                ],
+                "action_list": [
+                    [
+                        "wait(1)"
+                    ],
+                    [
+                        "wait(1)"
+                    ]
+                ],
+                "original_log": ""
+            }
+        }
+    ]
+}

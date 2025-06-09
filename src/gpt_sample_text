@@ -1,0 +1,427 @@
+
+----This overcook version is 0.0.1----
+
+
+===P0 agent: LLMPair | P1 agent: LLMPair===
+
+
+----Use gpt-3.5-turbo-0125----
+
+
+----Use gpt-3.5-turbo-0125----
+
+
+--->Initializing GPT planner<---
+
+
+--->Initializing GPT planner<---
+
+
+>>>>>>>>>>>>>time: 0<<<<<<<<<<<<<<<<<<<<<
+
+X       X       X       P       X       
+
+I               X       ↑0      X       
+
+C       ↑1      X               X       
+
+D               X               O       
+
+X       B       X       S       X       
+
+
+
+
+### Observation module to Chef
+
+Successful Action History: []
+Lessons from Past Failures
+[]
+Chef space:pot0  oven0  counter 
+Assistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser
+Order:boiled_egg
+Scene 0: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states are as follows: counters have nothing.
+
+
+
+
+### GPT Planner module
+
+====== GPT Query ======
+Chef analysis: The current order is to make a boiled egg. We need to pick up an egg, cook it in the pot for 3 timesteps, and then serve it. The Chef space includes pot0, oven0, and the counter. The Assistant space includes chopping_board0, blender0, dish_dispenser, and ingredient_dispenser.
+
+Chef plan: pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); cook(pot0); wait(3); deliver_soup()
+Chef say: Please pick up an egg from the ingredient dispenser and place it in the pot on the counter. Then, start cooking the egg in the pot. After 3 timesteps, deliver the boiled egg.
+
+[END]
+
+
+>>>>>>>>>>>>>>>>>>Begin communication<<<<<<<<<<<<<
+
+Input for Assistant:
+
+Successful Action History: []
+Lessons from Past Failures
+[]
+Chef space:pot0  oven0  counter 
+Assistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser
+Order:boiled_egg
+Scene 0: <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [] <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Assistant>. Their states are as follows: counters have nothing.
+Chef say history turn 1 : Please pick up an egg from the ingredient dispenser and place it in the pot on the counter. Then, start cooking the egg in the pot. After 3 timesteps, deliver the boiled egg.
+
+[END]
+
+
+===== Parser =====
+
+
+Generate new action list <['pickup(egg, ingredient_dispenser)', ' put_obj_in_utensil(pot0)', ' wait(3)', ' fill_dish_with_food(pot0)']>
+
+Answer of Assistant:
+
+Assistant analysis: The current order is to prepare a boiled egg. The Chef has instructed me to pick up an egg from the ingredient dispenser, place it in the pot on the counter, start cooking the egg, and deliver the boiled egg after 3 timesteps.
+
+Assistant plan: pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); wait(3); fill_dish_with_food(pot0)
+
+Assistant say: [NOTHING]
+
+[END]
+
+
+Input for Chef:
+
+Successful Action History: []
+Lessons from Past Failures
+[]
+Chef space:pot0  oven0  counter 
+Assistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser
+Order:boiled_egg
+Scene 0: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); wait(3); fill_dish_with_food(pot0)] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states are as follows: counters have nothing.
+Chef say history turn 1 : Please pick up an egg from the ingredient dispenser and place it in the pot on the counter. Then, start cooking the egg in the pot. After 3 timesteps, deliver the boiled egg.
+
+[END]
+Assistant say history turn 1 : OK.<END>
+
+
+===== Parser =====
+
+
+Generate new action list <['fill_dish_with_food(pot0)', 'deliver_soup()']>
+
+>>>>>>>>>>>>>>>>>>>>Chef decide to make action:<<<<<<<<<<<<<<<<<
+
+Chef analysis: The current order is to prepare a Boiled Egg. The Assistant has already planned to pick up an egg from the ingredient dispenser, put it in the pot, wait for 3 timesteps, and then fill the dish with food from the pot. The Chef needs to coordinate with the Assistant to ensure the order is completed efficiently.
+
+Chef plan: fill_dish_with_food(pot0);deliver_soup()
+
+Chef say: [NOTHING]
+
+
+
+
+
+>>>>>>>>>>>>>>>>>>Finish communication<<<<<<<<<<<<<
+
+
+===== Parser =====
+
+
+~~~~~~~~ Explainer~~~~~~~~
+Your action fill_dish_with_food(pot0) raised an error: boiled_egg does not need dish. Please directly pick cooked food from utensil and deliver it to the service location.
+
+
+
+### Observation module to Chef
+
+Successful Action History: []
+Lessons from Past Failures
+[]
+Chef space:pot0  oven0  counter 
+Assistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser
+Order:boiled_egg
+Scene 0: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [fill_dish_with_food(pot0)] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); wait(3); fill_dish_with_food(pot0)] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states are as follows: counters have nothing.
+
+Below are the failed and analysis history about your last chosed action,you can use the information to reach correct action alone AND DO NOT COMMUNICATE WITH YOUR TEAMMATE :
+Your action fill_dish_with_food(pot0) raised an error: boiled_egg does not need dish. Please directly pick cooked food from utensil and deliver it to the service location.
+
+
+
+
+
+### GPT Planner module
+
+====== GPT Query ======
+Chef analysis: The failed action of fill_dish_with_food(pot0) indicates that boiled_egg does not require a dish. Therefore, I should directly pick up the cooked food from the pot and deliver it to the service location.
+
+Chef plan: deliver_soup()
+
+Chef say:[NOTHING]
+
+===== Parser =====
+
+
+
+
+### Already have plan in pre-communication:
+ ['pickup(egg, ingredient_dispenser)', ' put_obj_in_utensil(pot0)', ' wait(3)', ' fill_dish_with_food(pot0)']
+
+===== Parser =====
+
+((0, 0), (0, -1))
+
+-----------Controller-----------
+
+action: P0 stay | P1 ↑
+[None, None]
+
+r: 0 | total: 0
+
+
+P0's real behavior: []
+P1's real behavior: []
+
+>>>>>>>>>>>>>time: 1<<<<<<<<<<<<<<<<<<<<<
+
+X       X       X       P       X       
+
+I       ↑1      X       ↑0      X       
+
+C               X               X       
+
+D               X               O       
+
+X       B       X       S       X       
+
+
+
+
+### Observation module to Chef
+
+Successful Action History: []
+Lessons from Past Failures
+[]
+Chef space:pot0  oven0  counter 
+Assistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser
+Order:boiled_egg
+Scene 1: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); wait(3); fill_dish_with_food(pot0)] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states are as follows: counters have nothing.
+
+
+
+
+### GPT Planner module
+
+====== GPT Query ======
+Chef analysis: The order is to prepare a boiled egg. The recipe requires picking up an egg, placing it in a pot, cooking it for 3 timesteps, and serving it. The Assistant has already planned to pick up the egg, put it in the pot, wait for 3 timesteps, and fill the dish with the cooked egg.
+
+Chef plan: pickup(dish, dish_dispenser); put_obj_in_utensil(pot0)
+
+Chef say: request('pickup(egg, ingredient_dispenser)')
+
+---
+
+<input>
+Successful Action History: []
+Lessons from Past Failures
+[]
+Chef space:pot0  oven0  counter 
+Assistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser
+Order:boiled_egg
+Scene 1: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); wait(3); fill_dish_with_food(pot0)] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states are as follows: counters have nothing.
+
+
+>>>>>>>>>>>>>>>>>>Begin communication<<<<<<<<<<<<<
+
+Input for Assistant:
+
+Successful Action History: []
+Lessons from Past Failures
+[]
+Chef space:pot0  oven0  counter 
+Assistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser
+Order:boiled_egg
+Scene 1: <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); wait(3); fill_dish_with_food(pot0)] <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Assistant>. Their states are as follows: counters have nothing.
+Chef say history turn 1 : request('pickup(egg, ingredient_dispenser)')
+
+---
+
+<input>
+Successful Action History: []
+Lessons from Past Failures
+[]
+Chef space:pot0  oven0  counter 
+Assistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser
+Order:boiled_egg
+Scene 1: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); wait(3); fill_dish_with_food(pot0)] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states are as follows: counters have nothing.
+
+
+===== Parser =====
+
+[ADD]:Current action are too much. Does not add <['pickup(egg, ingredient_dispenser)', ' 
+put_obj_in_utensil(pot0)', ' wait(3)', ' fill_dish_with_food(pot0)']> in queue
+
+Answer of Assistant:
+
+Assistant analysis: The current order is to make boiled eggs. The Assistant needs to pick up an egg from the ingredient dispenser, place it in the pot, wait for it to cook, and then fill a dish with the boiled egg. The Chef has requested the Assistant to pick up an egg from the ingredient dispenser.
+
+Assistant plan: pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); wait(3); fill_dish_with_food(pot0)
+
+Assistant say: [NOTHING]
+
+
+Input for Chef:
+
+Successful Action History: []
+Lessons from Past Failures
+[]
+Chef space:pot0  oven0  counter 
+Assistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser
+Order:boiled_egg
+Scene 1: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); wait(3); fill_dish_with_food(pot0)] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states are as follows: counters have nothing.
+Chef say history turn 1 : request('pickup(egg, ingredient_dispenser)')
+
+---
+
+<input>
+Successful Action History: []
+Lessons from Past Failures
+[]
+Chef space:pot0  oven0  counter 
+Assistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser
+Order:boiled_egg
+Scene 1: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); wait(3); fill_dish_with_food(pot0)] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states are as follows: counters have nothing.
+Assistant say history turn 1 : OK.<END>
+
+
+===== Parser =====
+
+
+Generate new action list <['wait(1)']>
+
+>>>>>>>>>>>>>>>>>>>>Chef decide to make action:<<<<<<<<<<<<<<<<<
+
+Chef analysis: The current order is to prepare a boiled egg. The assistant has already planned to pick up an egg from the ingredient dispenser, put it in the pot, wait for 3 timesteps, and then fill a dish with the cooked egg. Our focus should be on coordinating these actions to efficiently complete the order.
+
+Chef plan: request('put_obj_in_utensil(pot0)'); request('wait(3)')
+
+Chef say: [NOTHING]
+
+
+
+
+
+>>>>>>>>>>>>>>>>>>Finish communication<<<<<<<<<<<<<
+
+
+===== Parser =====
+
+((0, 0), (-1, 0))
+
+-----------Controller-----------
+
+action: P0 stay | P1 ←
+[None, None]
+
+r: 0 | total: 0
+
+
+P0's real behavior: []
+P1's real behavior: []
+
+>>>>>>>>>>>>>time: 2<<<<<<<<<<<<<<<<<<<<<
+
+X       X       X       P       X       
+
+I       ←1      X       ↑0      X       
+
+C               X               X       
+
+D               X               O       
+
+X       B       X       S       X       
+
+
+
+
+### Observation module to Chef
+
+Successful Action History: []
+Lessons from Past Failures
+[]
+Chef space:pot0  oven0  counter 
+Assistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser
+Order:boiled_egg
+Scene 2: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); wait(3); fill_dish_with_food(pot0)] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states are as follows: counters have nothing.
+
+
+
+
+### GPT Planner module
+
+====== GPT Query ======
+Chef analysis: The current order is to make boiled egg. The assistant has already picked up an egg from the ingredient dispenser and placed it in the pot. The next steps involve cooking the egg in the pot for 3 timesteps and then filling the dish with the cooked egg.
+
+Chef plan: cook(pot0); wait(3); fill_dish_with_food(pot0)
+
+Chef say: [NOTHING]
+
+===== Parser =====
+
+
+~~~~~~~~ Explainer~~~~~~~~
+Your action cook(pot0) raised an error: Ingredients in pot0 are not enough to begin the operation.
+
+
+
+### Observation module to Chef
+
+Successful Action History: []
+Lessons from Past Failures
+[]
+Chef space:pot0  oven0  counter 
+Assistant space:chopping_board0  blender0  dish_dispenser  ingredient_dispenser
+Order:boiled_egg
+Scene 2: <Chef> holds nothing. The planned sequence of actions (yet to be performed) for Chef is [cook(pot0)] <Assistant> holds nothing. The planned sequence of actions (yet to be performed) for Assistant is [pickup(egg, ingredient_dispenser); put_obj_in_utensil(pot0); wait(3); fill_dish_with_food(pot0)] Kitchen states: <pot0> is empty; <chopping_board0> is empty; <oven0> is empty; <blender0> is empty; 3 counters can be visited by <Chef>. Their states are as follows: counters have nothing.
+
+Below are the failed and analysis history about your last chosed action,you can use the information to reach correct action alone AND DO NOT COMMUNICATE WITH YOUR TEAMMATE :
+Your action cook(pot0) raised an error: Ingredients in pot0 are not enough to begin the operation.
+
+
+
+
+
+### GPT Planner module
+
+====== GPT Query ======
+Chef analysis: The previous action of attempting to cook in pot0 failed due to insufficient ingredients. The recipe for boiled egg requires picking up an egg, placing it in the pot, cooking for 3 timesteps, and then serving it. Currently, the assistant is planning to pick up an egg, put it in the pot, wait for 3 timesteps, and fill a dish with the cooked egg. 
+
+Chef plan: request('pickup(egg, ingredient_dispenser)'); request('put_obj_in_utensil(pot0)'); wait(3); fill_dish_with_food(pot0)
+
+Chef say: [NOTHING]
+
+===== Parser =====
+
+((0, 0), 'interact')
+
+-----------Controller-----------
+
+action: P0 stay | P1 interact
+[None, 'pickup(egg, ingredient_dispenser)']
+P1 finished <pickup(egg, ingredient_dispenser)>. 
+r: 0 | total: 0
+
+
+P0's real behavior: []
+P1's real behavior: []
+Episode 2/1: 0
+====
+
+
+Cost time : 30.063s-----
+
+
+
+=======Finshed all=========
+
+Cost time : 30.065s-----
+
+

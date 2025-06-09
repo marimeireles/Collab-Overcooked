@@ -95,7 +95,7 @@ def compute_and_save_embeddings(exp_log, embedding_file="embedding_data.pkl"):
             turns = content[0]["turn"]
             filtered_turns = list(
                 dict.fromkeys([turn for turn in turns if "[NOTHING]" not in turn])
-            )  
+            )
 
             # Connect the processed sentences into a new dialogue
             coop_message = " \n\n ".join(filtered_turns)
@@ -144,9 +144,7 @@ def compute_cosine_similarity(
         message_embedding = np.array(content["message"]).reshape(1, -1)
         action_embedding = np.array(content["action"]).reshape(1, -1)
 
-        sim = cosine_similarity(message_embedding, action_embedding)[0][
-            0
-        ]  
+        sim = cosine_similarity(message_embedding, action_embedding)[0][0]
         cosine_similarity_result[timestamp]["cosine_similarity"] = sim
         sim_result_all.append(sim)
     avg = np.mean(sim_result_all)
@@ -270,13 +268,9 @@ class ExpLog:
             def extract_timestamp(file_name):
                 # Suppose the timestamp format is 'experiment_YYYY-MM-DD_HH-MM-SS_...'
                 # Extract the date time part（2024-12-03_04-20-29）
-                timestamp_str = file_name.split("_")[
-                    1:3
-                ]  
-                timestamp = " ".join(timestamp_str) 
-                return datetime.strptime(
-                    timestamp, "%Y-%m-%d %H-%M-%S"
-                ) 
+                timestamp_str = file_name.split("_")[1:3]
+                timestamp = " ".join(timestamp_str)
+                return datetime.strptime(timestamp, "%Y-%m-%d %H-%M-%S")
 
             log_files.sort(key=extract_timestamp)
 
@@ -709,9 +703,7 @@ class Evaluation:
             encoded_action_one_log = []
             for action_dict in agent_actions:
                 agent_encoded_actions = []
-                action_sequence = [
-                    action["action"] for action in action_dict
-                ] 
+                action_sequence = [action["action"] for action in action_dict]
 
                 if len(action_sequence) == 0:
                     action_sequence.append("[NONE]")
@@ -890,10 +882,13 @@ class Evaluation:
 
         BETA = 0.95
 
-        f1 = (1 + BETA * BETA) * max_depth / (len(reference_encoded) +  BETA * BETA * len(log_action_encoded))
+        f1 = (
+            (1 + BETA * BETA)
+            * max_depth
+            / (len(reference_encoded) + BETA * BETA * len(log_action_encoded))
+        )
 
         return tp, ea, f1
-    
 
     def ites(self, seq_1, seq_2, agent_id):
         sim_seq_1_list = []
@@ -942,7 +937,7 @@ class Evaluation:
                 action_embedding = np.array(action_embedding_cache[action])
             else:
                 action_embedding = get_embedding_from_openai(action)
-                action_embedding_cache[action] = action_embedding  
+                action_embedding_cache[action] = action_embedding
                 new_embedding_action_list = True
 
             action_embeddings.append((action, np.array(action_embedding)))
@@ -954,7 +949,7 @@ class Evaluation:
         if content in embedding_cache:
             content_embedding = np.array(embedding_cache[content])
         else:
-            content_embedding = get_embedding_from_openai(content) 
+            content_embedding = get_embedding_from_openai(content)
             content_embedding = np.array(content_embedding)
             embedding_cache[content] = content_embedding.tolist()
 
@@ -981,7 +976,9 @@ class Evaluation:
             )
             return most_similar_action
         else:
-            print(f"Original Action: {content}, Changed action: {max_similarity}, No change")
+            print(
+                f"Original Action: {content}, Changed action: {max_similarity}, No change"
+            )
             return None
 
     def compute_action_matrix(self, log_action_encoded):
@@ -1081,11 +1078,9 @@ class Evaluation:
                                 one_log_action_encoded[agent],
                             )[1]
                         )
-                        similarity_content, redundancy_content, f1_content = (
-                            self.tes(
-                                reference_seq_encoded[content],
-                                one_log_action_encoded[agent],
-                            )
+                        similarity_content, redundancy_content, f1_content = self.tes(
+                            reference_seq_encoded[content],
+                            one_log_action_encoded[agent],
                         )
                         similarity_and_redundancy_each_reference[content].append(
                             (similarity_content, redundancy_content, f1_content)
@@ -1163,10 +1158,18 @@ class Evaluation:
                         "std_similarity": None,
                         "std_redundancy": None,
                     }
-        a0_sim = result[order_name]["average"]["similarity_and_redundancy"]["agent_0"]["mean_similarity"]
-        a1_sim = result[order_name]["average"]["similarity_and_redundancy"]["agent_1"]["mean_similarity"]
-        a0_red = result[order_name]["average"]["similarity_and_redundancy"]["agent_0"]["mean_redundancy"]
-        a1_red = result[order_name]["average"]["similarity_and_redundancy"]["agent_1"]["mean_redundancy"]
+        a0_sim = result[order_name]["average"]["similarity_and_redundancy"]["agent_0"][
+            "mean_similarity"
+        ]
+        a1_sim = result[order_name]["average"]["similarity_and_redundancy"]["agent_1"][
+            "mean_similarity"
+        ]
+        a0_red = result[order_name]["average"]["similarity_and_redundancy"]["agent_0"][
+            "mean_redundancy"
+        ]
+        a1_red = result[order_name]["average"]["similarity_and_redundancy"]["agent_1"][
+            "mean_redundancy"
+        ]
 
         a0_ref_len = len(self.reference_encoded[order_name]["reference_1"]["agent_0"])
         a1_ref_len = len(self.reference_encoded[order_name]["reference_1"]["agent_1"])
@@ -1190,8 +1193,9 @@ class Evaluation:
 
         result[order_name]["task_metrics"] = task_metrics
 
-        collaboration_confusion_matrix, process_result = self.evaluate_collaboration(save_dir)
-
+        collaboration_confusion_matrix, process_result = self.evaluate_collaboration(
+            save_dir
+        )
 
         initate_count = (
             collaboration_confusion_matrix[0][0][0]
@@ -1225,7 +1229,7 @@ class Evaluation:
 
         statistic_result = {
             "initiate_collaboration": initiate_collaboration,
-            "respond_collaboration": respond_collaboration
+            "respond_collaboration": respond_collaboration,
         }
         result[order_name]["statistic"] = statistic_result
         result[order_name]["confusion_matrix"] = collaboration_confusion_matrix
@@ -1239,14 +1243,13 @@ class Evaluation:
         print(f"Results saved to {save_path}")
         return result
 
-
     def extract_actions(self, plan: str):
         # Use regular expressions to match all actions following "plan:"
-        match = re.search(r"plan:\s*(.*)", plan)  
+        match = re.search(r"plan:\s*(.*)", plan)
         if match:
             # Extract the part after "plan:" and use the regular to find the action
             actions_part = match.group(1)
-            actions = re.findall(r"\w+\([^\)]*\)|\w+", actions_part)  
+            actions = re.findall(r"\w+\([^\)]*\)|\w+", actions_part)
             actions = [action.replace(" ", "") for action in actions]
             actions = [
                 action
@@ -1392,7 +1395,6 @@ class Evaluation:
                         # if result_temp is not None:
                         #     request_action_processed.append(result_temp)
 
-
             item["statistic_data"]["begin_agent"] = begin_agent
             # item['statistic_data']['agent_action_collaboration'] = action_agent
             item["statistic_data"]["history_agent_action"] = history_action
@@ -1410,7 +1412,6 @@ class Evaluation:
             item["statistic_data"]["history_agent_action_encoded"] = (
                 self.encode_action_sequence(history_action)
             )
-
 
             H = item["statistic_data"]["history_agent_action_encoded"]
             R = item["statistic_data"]["request_action_encoded"]

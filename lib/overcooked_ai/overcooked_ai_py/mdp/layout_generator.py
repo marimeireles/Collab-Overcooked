@@ -4,16 +4,24 @@ from overcooked_ai_py.mdp.actions import Action, Direction
 from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
 
 
-EMPTY = ' '
-COUNTER = 'X'
-ONION_DISPENSER = 'O'
-TOMATO_DISPENSER = 'T'
-POT = 'P'
-DISH_DISPENSER = 'D'
-SERVING_LOC = 'S'
+EMPTY = " "
+COUNTER = "X"
+ONION_DISPENSER = "O"
+TOMATO_DISPENSER = "T"
+POT = "P"
+DISH_DISPENSER = "D"
+SERVING_LOC = "S"
 
-CODE_TO_TYPE = { 0: EMPTY, 1: COUNTER, 2: ONION_DISPENSER, 3: TOMATO_DISPENSER, 4: POT, 5: DISH_DISPENSER, 6: SERVING_LOC}
-TYPE_TO_CODE = { v:k for k, v in CODE_TO_TYPE.items() }
+CODE_TO_TYPE = {
+    0: EMPTY,
+    1: COUNTER,
+    2: ONION_DISPENSER,
+    3: TOMATO_DISPENSER,
+    4: POT,
+    5: DISH_DISPENSER,
+    6: SERVING_LOC,
+}
+TYPE_TO_CODE = {v: k for k, v in CODE_TO_TYPE.items()}
 
 
 class LayoutGenerator(object):
@@ -21,34 +29,41 @@ class LayoutGenerator(object):
 
     def __init__(self, outer_shape, mdp_params):
         """
-        Defines a layout generator that will return OvercoookedGridworld instances 
+        Defines a layout generator that will return OvercoookedGridworld instances
         with layout of size `outer_shape`
         """
         self.outer_shape = np.array(outer_shape)
         self.mdp_params = mdp_params
 
     @staticmethod
-    def mdp_gen_fn_from_dict(mdp_params={}, mdp_choices=None, size_bounds=((4, 7), (4, 7)), 
-                                prop_empty=(0.6, 0.8), prop_feats=(0.1, 0.2), display=False):
+    def mdp_gen_fn_from_dict(
+        mdp_params={},
+        mdp_choices=None,
+        size_bounds=((4, 7), (4, 7)),
+        prop_empty=(0.6, 0.8),
+        prop_feats=(0.1, 0.2),
+        display=False,
+    ):
         """Returns an MDP generator with the passed in properties."""
 
         if mdp_choices is not None:
             assert type(mdp_choices) is list
-            
+
             # If list of MDPs, randomly choose one at each reset
             mdp_sizes = []
             for mdp_name in mdp_choices:
                 mdp = OvercookedGridworld.from_layout_name(mdp_name, **mdp_params)
                 mdp_sizes.append([mdp.width, mdp.height])
             widths, heights = np.array(mdp_sizes).T
-            min_padding = max(widths), max(heights)            
-            
+            min_padding = max(widths), max(heights)
+
             def mdp_generator_fn():
                 chosen_mdp = np.random.choice(mdp_choices)
                 mdp = OvercookedGridworld.from_layout_name(chosen_mdp, **mdp_params)
                 lg = LayoutGenerator(min_padding, mdp_params)
                 mdp_padded = lg.padded_mdp(mdp)
                 return mdp_padded
+
         else:
             min_padding = (size_bounds[0][1], size_bounds[1][1])
             layout_generator = LayoutGenerator(min_padding, mdp_params)
@@ -56,9 +71,9 @@ class LayoutGenerator(object):
                 inner_shape=[rnd_int_uniform(*dim) for dim in size_bounds],
                 prop_empty=rnd_uniform(*prop_empty),
                 prop_features=rnd_uniform(*prop_feats),
-                display=display
+                display=display,
             )
-        
+
         return mdp_generator_fn
 
     def padded_mdp(self, mdp, display=False):
@@ -67,18 +82,28 @@ class LayoutGenerator(object):
         padded_grid = self.embed_grid(grid)
 
         start_positions = self.get_random_starting_positions(padded_grid)
-        mdp_grid = self.padded_grid_to_layout_grid(padded_grid, start_positions, display=display)
-        return OvercookedGridworld.from_grid(mdp_grid, base_layout_params=self.mdp_params)
+        mdp_grid = self.padded_grid_to_layout_grid(
+            padded_grid, start_positions, display=display
+        )
+        return OvercookedGridworld.from_grid(
+            mdp_grid, base_layout_params=self.mdp_params
+        )
 
-    def make_disjoint_sets_layout(self, inner_shape, prop_empty, prop_features, display=True):        
+    def make_disjoint_sets_layout(
+        self, inner_shape, prop_empty, prop_features, display=True
+    ):
         grid = Grid(inner_shape)
         self.dig_space_with_disjoint_sets(grid, prop_empty)
         self.add_features(grid, prop_features)
 
         padded_grid = self.embed_grid(grid)
         start_positions = self.get_random_starting_positions(padded_grid)
-        mdp_grid = self.padded_grid_to_layout_grid(padded_grid, start_positions, display=display)
-        return OvercookedGridworld.from_grid(mdp_grid, base_layout_params=self.mdp_params)
+        mdp_grid = self.padded_grid_to_layout_grid(
+            padded_grid, start_positions, display=display
+        )
+        return OvercookedGridworld.from_grid(
+            mdp_grid, base_layout_params=self.mdp_params
+        )
 
     def padded_grid_to_layout_grid(self, padded_grid, start_positions, display=False):
         if display:
@@ -91,7 +116,7 @@ class LayoutGenerator(object):
         for i, pos in enumerate(start_positions):
             x, y = pos
             mdp_grid[y][x] = str(i + 1)
-        
+
         return mdp_grid
 
     def embed_grid(self, grid):
@@ -132,7 +157,7 @@ class LayoutGenerator(object):
         self.dig_space_with_fringe_expansion(grid, prop_empty)
         self.add_features(grid)
         print(grid)
-    
+
     def dig_space_with_fringe_expansion(self, grid, prop_empty=0.1):
         starting_location = grid.get_random_interior_location()
         fringe = Fringe(grid)
@@ -148,9 +173,14 @@ class LayoutGenerator(object):
 
     def add_features(self, grid, prop_features=0):
         """
-        Places one round of basic features and then adds random features 
+        Places one round of basic features and then adds random features
         until prop_features of valid locations are filled"""
-        feature_types = [POT, ONION_DISPENSER, DISH_DISPENSER, SERVING_LOC] # NOTE: currently disabled TOMATO_DISPENSER
+        feature_types = [
+            POT,
+            ONION_DISPENSER,
+            DISH_DISPENSER,
+            SERVING_LOC,
+        ]  # NOTE: currently disabled TOMATO_DISPENSER
 
         valid_locations = grid.valid_feature_locations()
         np.random.shuffle(valid_locations)
@@ -178,7 +208,7 @@ class LayoutGenerator(object):
 
 
 class Grid(object):
-    
+
     def __init__(self, shape):
         assert len(shape) == 2, "Grid must be 2 dimensional"
         grid = (np.ones(shape) * TYPE_TO_CODE[COUNTER]).astype(np.int)
@@ -200,7 +230,7 @@ class Grid(object):
     def terrain_at_loc(self, location):
         x, y = location
         return self.mtx[x][y]
-    
+
     def dig(self, location):
         assert self.is_valid_dig_location(location)
         self.change_location(location, EMPTY)
@@ -225,13 +255,13 @@ class Grid(object):
         for d in Direction.ALL_DIRECTIONS:
             new_location = Action.move_in_direction(location, d)
             if self.is_in_bounds(new_location):
-                near_locations.append(new_location)                
+                near_locations.append(new_location)
         return near_locations
 
     def is_in_bounds(self, location):
         x, y = location
         return x >= 0 and y >= 0 and x < self.shape[0] and y < self.shape[1]
-        
+
     def is_valid_dig_location(self, location):
         x, y = location
 
@@ -265,7 +295,13 @@ class Grid(object):
             return False
 
         # If location is next to at least one empty square
-        if any([loc for loc in self.get_near_locations(location) if CODE_TO_TYPE[self.terrain_at_loc(loc)] == EMPTY]):
+        if any(
+            [
+                loc
+                for loc in self.get_near_locations(location)
+                if CODE_TO_TYPE[self.terrain_at_loc(loc)] == EMPTY
+            ]
+        ):
             return True
         else:
             return False
@@ -294,7 +330,9 @@ class Grid(object):
                 column.append(CODE_TO_TYPE[self.mtx[x][y]])
             rows.append(column)
         string_grid = np.array(rows)
-        assert np.array_equal(string_grid.T.shape, self.shape), "{} vs {}".format(string_grid.shape, self.shape)
+        assert np.array_equal(string_grid.T.shape, self.shape), "{} vs {}".format(
+            string_grid.shape, self.shape
+        )
         return string_grid
 
     def __repr__(self):
@@ -341,7 +379,7 @@ class DisjointSets(object):
     def __init__(self, elements):
         self.num_elements = len(elements)
         self.num_sets = len(elements)
-        self.parents = { element : element for element in elements }
+        self.parents = {element: element for element in elements}
 
     def is_connected(self):
         return self.num_sets == 1
