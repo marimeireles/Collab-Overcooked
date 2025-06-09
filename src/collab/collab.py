@@ -19,11 +19,13 @@ from overcooked_ai_py.planning.search import (find_path, get_intersect_counter,
 from rich import print as rprint
 
 from collab.modules import if_two_sentence_similar_meaning
+from config import cfg
 
 from .modules import Module, statistics_dict, turn_statistics_dict
 
 cwd = os.getcwd()
-openai_key_file = os.path.join(cwd, "openai_key.txt")
+if cfg.getboolean("settings", "openai_enabled"):
+    openai_key_file = os.path.join(cwd, "openai_key.txt")
 PROMPT_DIR = os.path.join(cwd, "prompts")
 
 NAME_TO_ACTION = {
@@ -49,8 +51,9 @@ class LLMPair(object):
         self.model_dirname = model_dirname
         self.local_server_api = local_server_api
 
-        self.openai_api_keys = []
-        self.load_openai_keys()
+        if cfg.getboolean("settings", "openai_enabled"):
+            self.openai_api_keys = []
+            self.load_openai_keys()
         self.key_rotation = True
         self.proxy = "http://10.29.202.138:7890"
 
@@ -1166,9 +1169,20 @@ class LLMAgents(LLMPair):
                 + "\n\n<END>Now please return correct answer with your loss part.",
             }
             # print(self.planner.current_user_message)
-            response, correction_tokens = self.planner.query(
-                key=self.openai_api_key(), proxy=self.proxy, stop="Scene", trace=True
-            )
+            if cfg.getboolean("settings", "openai_enabled"):
+                response, correction_tokens = self.planner.query(
+                    key=self.openai_api_key(),
+                    proxy=self.proxy,
+                    stop="Scene",
+                    trace=True,
+                )
+            else:
+                response, correction_tokens = self.planner.query(
+                    key="", proxy=self.proxy, stop="Scene", trace=True
+                )
+                print(
+                    "⚠️ Warning: OpenAI API is disabled. Skipping error handling (?Not sure?) in 'important_part_no_create'"
+                )
             # statistic
             self.turn_statistics_dict["statistical_data"]["error"][self.agent_index][
                 "format_error"
@@ -1210,9 +1224,16 @@ class LLMAgents(LLMPair):
             "role": "user",
             "content": self.state_prompt + message,
         }
-        response, tokens_num = self.planner.query(
-            key=self.openai_api_key(), proxy=self.proxy, stop="Scene", trace=True
-        )
+        if cfg.getboolean("settings", "openai_enabled"):
+            response, correction_tokens = self.planner.query(
+                key=self.openai_api_key(), proxy=self.proxy, stop="Scene", trace=True
+            )
+        else:
+            # For open source models, we don't need an API key
+            response, correction_tokens = self.planner.query(
+                key="", proxy=self.proxy, stop="Scene", trace=True
+            )
+
         parse_analysis = self.parse_response(response, "analysis")
         # Analsysis did not generate error handling:
         if parse_analysis == "":
@@ -1235,7 +1256,7 @@ class LLMAgents(LLMPair):
             ]["turn"].append(parse_talk)
             self.turn_statistics_dict["statistical_data"]["communication"][
                 communication_index
-            ]["token"].append(tokens_num)
+            ]["token"].append(correction_tokens)
             self.turn_statistics_dict["content"]["content"][communication_index].append(
                 {
                     "agent": self.agent_index,
@@ -1251,7 +1272,7 @@ class LLMAgents(LLMPair):
             ]["turn"].append(parse_talk)
             self.teammate.turn_statistics_dict["statistical_data"]["communication"][
                 communication_index
-            ]["token"].append(tokens_num)
+            ]["token"].append(correction_tokens)
             self.teammate.turn_statistics_dict["content"]["content"][
                 communication_index
             ].append(
@@ -1273,10 +1294,18 @@ class LLMAgents(LLMPair):
         for d in self.planner.dialog_history_list:
             # embedding for every dialog of agent
             if d["role"] == "talk":
-                if if_two_sentence_similar_meaning(
-                    self.openai_api_key(), self.proxy, d["content"], parse_talk
-                ):
-                    return True, response
+                if cfg.getboolean("settings", "openai_enabled"):
+                    if if_two_sentence_similar_meaning(
+                        self.openai_api_key(), self.proxy, d["content"], parse_talk
+                    ):
+                        return True, response
+                else:
+                    response, correction_tokens = self.planner.query(
+                        key="", proxy=self.proxy, stop="Scene", trace=True
+                    )
+                    print(
+                        "⚠️ Warning: OpenAI API is disabled. Skipping 'if_two_sentence_similar_meaning'."
+                    )
         self.planner.dialog_history_list.append({"role": "talk", "content": parse_talk})
 
         # check if there is action
@@ -1398,13 +1427,21 @@ class LLMAgents(LLMPair):
             "content": self.state_prompt + message + failure_message + success_message,
         }
         print(f"rethink input content: {self.planner.current_user_message['content']}")
-        response, correction_tokens = self.planner.query(
-            key=self.openai_api_key(),
-            proxy=self.proxy,
-            stop="Scene",
-            trace=self.trace,
-            rethink=True,
-        )
+        if cfg.getboolean("settings", "openai_enabled"):
+            response, correction_tokens = self.planner.query(
+                key=self.openai_api_key(),
+                proxy=self.proxy,
+                stop="Scene",
+                trace=self.trace,
+                rethink=True,
+            )
+        else:
+            response, correction_tokens = self.planner.query(
+                key="", proxy=self.proxy, stop="Scene", trace=True
+            )
+            print(
+                "⚠️ Warning: OpenAI API is disabled. Rethinking is disabled 'generate_rethink'."
+            )
         print(f"response of rethink: {response}")
         pattern = r"Rethink:(.*?)\."
         matches = re.search(pattern, response, re.IGNORECASE | re.DOTALL)
@@ -1505,13 +1542,25 @@ class LLMAgents(LLMPair):
 
             print(f"\n\n\n### GPT Planner module\n")
             print("====== GPT Query ======")
-            response, tokens_num = self.planner.query(
-                key=self.openai_api_key(),
-                proxy=self.proxy,
-                stop="Scene",
-                trace=self.trace,
-                map=self.mdp.state_string(self.state).replace("ø", "o"),
-            )
+            
+            # The Module.query() method handles both OpenAI and open source models
+            # based on the model name, so we can always call it
+            if cfg.getboolean("settings", "openai_enabled"):
+                response, token_count = self.planner.query(
+                    key=self.openai_api_key(),
+                    proxy=self.proxy,
+                    stop="Scene",
+                    trace=self.trace,
+                    map=self.mdp.state_string(self.state).replace("ø", "o"),
+                )
+            else:
+                response, token_count = self.planner.query(
+                    key="",
+                    proxy=self.proxy,
+                    stop="Scene",
+                    trace=self.trace,
+                    map=self.mdp.state_string(self.state).replace("ø", "o"),
+                )
             print(response)
             # check whether need communication
             # check whether has the plan
@@ -1552,7 +1601,7 @@ class LLMAgents(LLMPair):
             if failure_message != "":
                 self.turn_statistics_dict["statistical_data"]["error_correction"][
                     self.agent_index
-                ]["validator_correction"]["correction_tokens"].append(tokens_num)
+                ]["validator_correction"]["correction_tokens"].append(token_count)
                 # check if the  plan is empty
                 if "plan" == "":
                     plan_parse, plan = self.important_part_no_create(
@@ -1577,7 +1626,7 @@ class LLMAgents(LLMPair):
                 ]["turn"].append(communicate_response)
                 self.turn_statistics_dict["statistical_data"]["communication"][
                     self.agent_index
-                ]["token"].append(tokens_num)
+                ]["token"].append(token_count)
                 self.turn_statistics_dict["statistical_data"]["communication"][
                     self.agent_index
                 ]["call"] += 1

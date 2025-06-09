@@ -11,7 +11,6 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from config import cfg
 from dtw import dtw, dtwPlot, stepPattern, warp, warpArea, window
 from overcooked_ai_py.data.layouts import LAYOUTS_DIR, read_layout_dict
 from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
@@ -19,6 +18,8 @@ from overcooked_ai_py.utils import load_dict_from_file
 from rich import print as rprint
 from scipy.special import expit
 from sklearn.metrics.pairwise import cosine_similarity
+
+from config import cfg
 
 cwd = os.getcwd()
 
@@ -29,15 +30,16 @@ if os.path.exists(EMBEDDING_CACHE_PATH):
 else:
     embedding_cache = {}
 
-'''
+"""
     Note on code smell: there's currently an use_openai that's
     being misused. Instead of fixing it/removing it I'm just applying my own
     openai_enabled flag which is more robust and using it together
     with the old use_openai flag.
-'''
+"""
 if cfg.getboolean("settings", "openai_enabled"):
     import openai
     from openai import OpenAI
+
     gpt4_key_file = os.path.join(cwd, "openai_key.txt")
 REFERENCE_DIR = os.path.join(cwd, "prompts/reference")
 
@@ -114,8 +116,12 @@ def compute_and_save_embeddings(
             coop_action = str(action_history[timestamp][1])[1:-1]
 
             if cfg.getboolean("settings", "openai_enabled"):
-                coop_message_embedding = get_embedding_from_openai(coop_message, use_openai)
-                coop_action_embedding = get_embedding_from_openai(coop_action, use_openai)
+                coop_message_embedding = get_embedding_from_openai(
+                    coop_message, use_openai
+                )
+                coop_action_embedding = get_embedding_from_openai(
+                    coop_action, use_openai
+                )
 
                 coop_message_action_pair_embedding[unique_timestamp] = {
                     "message": coop_message_embedding,
@@ -935,7 +941,9 @@ class Evaluation:
         self, content, agent_id, similarity=0.9, use_openai=True
     ):
         if not cfg.getboolean("settings", "openai_enabled"):
-            print("⚠️ Warning: OpenAI API is disabled. Cannot compute action similarity.")
+            print(
+                "⚠️ Warning: OpenAI API is disabled. Cannot compute action similarity."
+            )
             return None
 
         # Loading or updating the embedding cache for content and actions

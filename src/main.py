@@ -5,7 +5,6 @@ import warnings
 from argparse import ArgumentParser
 from distutils.util import strtobool
 
-import config
 import importlib_metadata
 from overcooked_ai_py.agents.agent import AgentGroup
 from overcooked_ai_py.mdp.actions import Action
@@ -13,6 +12,7 @@ from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
 from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
 from rich import print as rprint
 
+import config
 from collab.modules import statistics_dict
 from collab.web_util import change_port, check_port_in_use, output_to_port
 from utils import combine_statistic_dict, make_agent
@@ -323,7 +323,6 @@ if __name__ == "__main__":
     variant = vars(args)
     config.cfg.set("settings", "openai_enabled", str(args.openai))
     config.save()
-    
 
     start_time = time.time()
     main(variant)
