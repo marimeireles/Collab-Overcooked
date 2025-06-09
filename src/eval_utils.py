@@ -9,11 +9,10 @@ from collections import Counter, defaultdict
 from datetime import datetime
 
 import numpy as np
-import openai
 import pandas as pd
 import plotly.graph_objects as go
+from config import cfg
 from dtw import dtw, dtwPlot, stepPattern, warp, warpArea, window
-from openai import OpenAI
 from overcooked_ai_py.data.layouts import LAYOUTS_DIR, read_layout_dict
 from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
 from overcooked_ai_py.utils import load_dict_from_file
@@ -30,8 +29,16 @@ if os.path.exists(EMBEDDING_CACHE_PATH):
 else:
     embedding_cache = {}
 
-
-gpt4_key_file = os.path.join(cwd, "openai_key.txt")
+'''
+    Note on code smell: there's currently an use_openai that's
+    being misused. Instead of fixing it/removing it I'm just applying my own
+    openai_enabled flag which is more robust and using it together
+    with the old use_openai flag.
+'''
+if cfg.getboolean("settings", "openai_enabled"):
+    import openai
+    from openai import OpenAI
+    gpt4_key_file = os.path.join(cwd, "openai_key.txt")
 REFERENCE_DIR = os.path.join(cwd, "prompts/reference")
 
 
@@ -66,21 +73,22 @@ def get_embedding_with_cache(content, use_openai=True):
     if content in embedding_cache:
         return np.array(embedding_cache[content])
     else:
-        embedding = get_embedding_from_openai(
-            content, use_openai
-        )  # Call API to get embed
-        embedding_cache[content] = embedding
-        # Write the new embed to the cache file
-        with open(EMBEDDING_CACHE_PATH, "w") as f:
-            json.dump(embedding_cache, f)
-        return np.array(embedding)
+        if cfg.getboolean("settings", "openai_enabled"):
+            embedding = get_embedding_from_openai(
+                content, use_openai
+            )  # Call API to get embed
+            embedding_cache[content] = embedding
+            # Write the new embed to the cache file
+            with open(EMBEDDING_CACHE_PATH, "w") as f:
+                json.dump(embedding_cache, f)
+            return np.array(embedding)
 
 
 def compute_and_save_embeddings(
     exp_log, embedding_file="embedding_data.pkl", use_openai=True
 ):
-    if not use_openai:
-        print("Warning: OpenAI API is disabled. Skipping embedding computation.")
+    if not config.openai_enabled:
+        print("⚠️ Warning: OpenAI API is disabled. Skipping embedding computation.")
         return {}, {}
 
     coop_message_action_pair_embedding = {}
@@ -105,13 +113,19 @@ def compute_and_save_embeddings(
             # Action History Extraction
             coop_action = str(action_history[timestamp][1])[1:-1]
 
-            coop_message_embedding = get_embedding_from_openai(coop_message, use_openai)
-            coop_action_embedding = get_embedding_from_openai(coop_action, use_openai)
+            if cfg.getboolean("settings", "openai_enabled"):
+                coop_message_embedding = get_embedding_from_openai(coop_message, use_openai)
+                coop_action_embedding = get_embedding_from_openai(coop_action, use_openai)
 
-            coop_message_action_pair_embedding[unique_timestamp] = {
-                "message": coop_message_embedding,
-                "action": coop_action_embedding,
-            }
+                coop_message_action_pair_embedding[unique_timestamp] = {
+                    "message": coop_message_embedding,
+                    "action": coop_action_embedding,
+                }
+            else:
+                coop_message_action_pair_embedding[unique_timestamp] = {
+                    "message": "",
+                    "action": "",
+                }
             coop_message_action_pair[unique_timestamp] = {
                 "message": coop_message,
                 "action": coop_action,
@@ -920,8 +934,8 @@ class Evaluation:
     def get_action_similarity_with_cache(
         self, content, agent_id, similarity=0.9, use_openai=True
     ):
-        if not use_openai:
-            print("Warning: OpenAI API is disabled. Cannot compute action similarity.")
+        if not cfg.getboolean("settings", "openai_enabled"):
+            print("⚠️ Warning: OpenAI API is disabled. Cannot compute action similarity.")
             return None
 
         # Loading or updating the embedding cache for content and actions
@@ -949,9 +963,10 @@ class Evaluation:
             if action in action_embedding_cache:
                 action_embedding = np.array(action_embedding_cache[action])
             else:
-                action_embedding = get_embedding_from_openai(action, use_openai)
-                action_embedding_cache[action] = action_embedding
-                new_embedding_action_list = True
+                if cfg.getboolean("settings", "openai_enabled"):
+                    action_embedding = get_embedding_from_openai(action, use_openai)
+                    action_embedding_cache[action] = action_embedding
+                    new_embedding_action_list = True
 
             action_embeddings.append((action, np.array(action_embedding)))
 
@@ -962,9 +977,10 @@ class Evaluation:
         if content in embedding_cache:
             content_embedding = np.array(embedding_cache[content])
         else:
-            content_embedding = get_embedding_from_openai(content, use_openai)
-            content_embedding = np.array(content_embedding)
-            embedding_cache[content] = content_embedding.tolist()
+            if cfg.getboolean("settings", "openai_enabled"):
+                content_embedding = get_embedding_from_openai(content, use_openai)
+                content_embedding = np.array(content_embedding)
+                embedding_cache[content] = content_embedding.tolist()
 
         # Write all updated content embed to cache file
         with open(EMBEDDING_CACHE_PATH, "w") as f:

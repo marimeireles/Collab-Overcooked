@@ -17,6 +17,10 @@ from collab.modules import statistics_dict
 from collab.web_util import change_port, check_port_in_use, output_to_port
 from utils import combine_statistic_dict, make_agent
 
+# Get current working directory for paths
+cwd = os.getcwd()
+PROMPT_DIR = os.path.join(cwd, "prompts")
+
 
 def boolean_argument(value):
     """Convert a string value to boolean."""
@@ -317,6 +321,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     variant = vars(args)
+    config.cfg.set("settings", "openai_enabled", str(args.openai))
+    config.save()
+    
 
     start_time = time.time()
     main(variant)
