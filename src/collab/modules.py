@@ -15,11 +15,11 @@ from .web_util import listen_to_server, output_to_port, username_record
 from config import cfg
 
 cwd = os.getcwd()
-gpt4_key_file = os.path.join(cwd, "openai_key.txt")
 # deepseek_key_file = os.path.join(cwd, "deepseek_key.txt")
 
-# Only load OpenAI key if OpenAI is enabled
 if cfg.getboolean("settings", "openai_enabled"):
+    gpt4_key_file = os.path.join(cwd, "openai_key.txt")
+
     import openai
     from openai import OpenAI
     
@@ -27,8 +27,6 @@ if cfg.getboolean("settings", "openai_enabled"):
         with open(gpt4_key_file, "r") as f:
             context = f.read()
         openai_key = context.split("\n")[0]
-    else:
-        openai_key = ""
 else:
     # For open source models, we still need the OpenAI import for API compatibility
     # but we use it with local servers
@@ -358,11 +356,7 @@ class Module(object):
     def get_top_k_similar_example(self, key, k=4):
         if k == 0:
             return ""
-        
-        # If OpenAI is disabled, return empty string to disable retrieval
-        if not cfg.getboolean("settings", "openai_enabled"):
-            print("⚠️ Warning: OpenAI API is disabled. Skipping example retrieval.")
-            return ""
+
             
         prompt_begin_chef = "Here are few examples to teach you the usage of your skills, but these are just some examples, you need to flexibly apply your skills according to the specific environment.\
 You should make plan for yourself in 'Chef plan', and make plan for assistant by saying to him.\n"
@@ -382,14 +376,15 @@ COOKING STEPs:
 </example_recipe>
 
 """  # get embedding for current input
+        # if user set up openai add a custom key, otherwise, use empty key
         key = ""
-        with open(gpt4_key_file, "r") as f:
-            context = f.read()
-        key = context.split("\n")[0]
-        openai.api_key = key
+        if cfg.getboolean("settings", "openai_enabled"):
+            with open(gpt4_key_file, "r") as f:
+                context = f.read()
+            key = context.split("\n")[0]
+            openai.api_key = key
 
-        get_response = False
-        openai.api_key = key
+            get_response = False
 
         input = self.current_user_message["content"]
         while not get_response:
@@ -428,6 +423,7 @@ COOKING STEPs:
 
 def if_two_sentence_similar_meaning(key, proxy, sentence1, sentence2):
     # If OpenAI is disabled, use a simple fallback
+    key = ""
     if not cfg.getboolean("settings", "openai_enabled"):
         print("⚠️ Warning: OpenAI API is disabled. Using simple similarity check.")
         # Simple token-based similarity as fallback
@@ -443,10 +439,11 @@ def if_two_sentence_similar_meaning(key, proxy, sentence1, sentence2):
         jaccard_sim = intersection / union if union > 0 else 0
         return jaccard_sim > 0.8
         
-    with open(gpt4_key_file, "r") as f:
-        context = f.read()
-    key = context.split("\n")[0]
-    openai.api_key = key
+        with open(gpt4_key_file, "r") as f:
+            context = f.read()
+            key = context.split("\n")[0]
+            openai.api_key = key
+
     if sentence1 == "":
         sentence1 = " "
     if sentence2 == "":
