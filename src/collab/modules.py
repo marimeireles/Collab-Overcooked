@@ -18,13 +18,13 @@ cwd = os.getcwd()
 # deepseek_key_file = os.path.join(cwd, "deepseek_key.txt")
 
 if cfg.getboolean("settings", "openai_enabled"):
-    gpt4_key_file = os.path.join(cwd, "openai_key.txt")
+    openai_key_file = os.path.join(cwd, "openai_key.txt")
 
     import openai
     from openai import OpenAI
     
-    if os.path.exists(gpt4_key_file):
-        with open(gpt4_key_file, "r") as f:
+    if os.path.exists(openai_key_file):
+        with open(openai_key_file, "r") as f:
             context = f.read()
         openai_key = context.split("\n")[0]
 else:
@@ -243,7 +243,10 @@ class Module(object):
         # TODO: this needs to be expanded to contain more OpenAI models
         elif any(model in self.model for model in ["gpt-3.5", "gpt-4", "text-davinci"]):
             messages = self.query_messages(rethink)
-            client = OpenAI(api_key=key)
+            with open(openai_key_file, "r") as f:
+                context = f.read()
+                openai_key = context.split("\n")[0]
+            client = OpenAI(api_key=openai_key)
             if "gpt-3.5" in self.model or "gpt-4" in self.model:
                 response = client.chat.completions.create(
                     model=self.model, messages=messages, temperature=temperature
@@ -379,13 +382,12 @@ COOKING STEPs:
         # if user set up openai add a custom key, otherwise, use empty key
         key = ""
         if cfg.getboolean("settings", "openai_enabled"):
-            with open(gpt4_key_file, "r") as f:
+            with open(openai_key_file, "r") as f:
                 context = f.read()
             key = context.split("\n")[0]
             openai.api_key = key
 
-            get_response = False
-
+        get_response = False
         input = self.current_user_message["content"]
         while not get_response:
             try:
@@ -438,11 +440,13 @@ def if_two_sentence_similar_meaning(key, proxy, sentence1, sentence2):
         union = len(tokens1.union(tokens2))
         jaccard_sim = intersection / union if union > 0 else 0
         return jaccard_sim > 0.8
-        
-        with open(gpt4_key_file, "r") as f:
+    
+    # If OpenAI is enabled, get the API key
+    if cfg.getboolean("settings", "openai_enabled"):
+        with open(openai_key_file, "r") as f:
             context = f.read()
-            key = context.split("\n")[0]
-            openai.api_key = key
+        key = context.split("\n")[0]
+        openai.api_key = key
 
     if sentence1 == "":
         sentence1 = " "
