@@ -27,6 +27,20 @@ def boolean_argument(value):
     return bool(strtobool(value))
 
 
+def is_openai_model(model_name):
+    """
+    Check if the given model name corresponds to an OpenAI model.
+    Returns True for OpenAI models (gpt-*, openai models), False otherwise.
+    """
+    if not model_name:
+        return False
+    
+    model_name_lower = model_name.lower()
+    openai_indicators = ["gpt-", "openai", "chatgpt", "davinci", "curie", "babbage", "ada"]
+    
+    return any(indicator in model_name_lower for indicator in openai_indicators)
+
+
 def check_recipe_parse(variant):
     """
     Verify that a recipe file matching variant['order'] exists under PROMPT_DIR/recipe/.
@@ -143,69 +157,108 @@ def main(variant):
         env.reset()
         r_total = 0
 
+        # Experimental mode: Run the full game simulation
         if mode == "exp":
-            for t in range(horizon):
-                s_t = env.state
-                print(f"\n>>>>>>>>>>>>>time: {t}<<<<<<<<<<<<<<<<<<<<<\n")
-                map_str = env.mdp.state_string(s_t).replace("ø", "o")
-                print(map_str)
+            # Main game loop - iterate through each time step
+            for time_step in range(horizon):
+                # Get current game state
+                current_state = env.state
+                
+                print(f"\n>>>>>>>>>>>>>time: {time_step}<<<<<<<<<<<<<<<<<<<<<\n")
+                
+                # Convert and display the current map state (replace special characters)
+                map_string = env.mdp.state_string(current_state).replace("ø", "o")
+                print(map_string)
 
-                a_t, ingredient_for_pickup = team.joint_action(s_t)
-                print(a_t)
-                dialogue_t = team.reset_dialogue()
+                # Check if Player 0 is using an OpenAI model and manage config accordingly
+                p0_is_openai = (variant["p0"] == "LLMPair" and 
+                               is_openai_model(variant["gpt_model"]))
+                
+                # Set OpenAI config flag if Player 0 uses OpenAI model
+                if p0_is_openai:
+                    config.cfg.set("settings", "openai_enabled", str(True))
+                    config.save()
+                    print('☀️B☀️E☀️G☀️I☀️N')
+                try:
+                    # Get joint action from both agents and any ingredient pickup parameters
+                    joint_action, ingredient_for_pickup = team.joint_action(current_state)
+                    print(joint_action)
+                finally:
+                    # Always reset OpenAI config flag back to False after Player 0's action
+                    if p0_is_openai:
+                        config.cfg.set("settings", "openai_enabled", str(False))
+                        config.save()
+                        print('☀️E☀️N☀️D')
+                
+                # Reset and get dialogue between agents
+                dialogue_turn = team.reset_dialogue()
+                
                 print(f"\n-----------Controller-----------\n")
                 print(
-                    f"action: P0 {Action.to_char(a_t[0])} | P1 {Action.to_char(a_t[1])}"
+                    f"action: P0 {Action.to_char(joint_action[0])} | P1 {Action.to_char(joint_action[1])}"
                 )
-                parm = ingredient_for_pickup
+                
+                # Set pickup parameters for the environment step
+                action_parameters = ingredient_for_pickup
 
-                obs, reward, done, env_info = env.step(a_t, parm)
+                # Execute the joint action in the environment
+                observation, reward, done, env_info = env.step(joint_action, action_parameters)
 
-                ml_actions = obs.ml_actions
-                skills = ""
-                for idx, ml_action in enumerate(ml_actions):
+                # Process and display completed machine learning actions (skills)
+                ml_actions = observation.ml_actions
+                completed_skills = ""
+                for player_idx, ml_action in enumerate(ml_actions):
                     if ml_action is None:
                         continue
-                    skills += f"P{idx} finished <{ml_action}>. "
-                print(skills)
+                    completed_skills += f"P{player_idx} finished <{ml_action}>. "
+                print(completed_skills)
 
+                # Update total reward
                 r_total += reward
+                
+                # Handle successful order completion (positive reward)
                 if reward > 0:
+                    # Record the completed order in statistics
                     statistics_dict["total_order_finished"].append(
-                        s_t.current_k_order[0]
+                        current_state.current_k_order[0]
                     )
+                    # Log delivery action for agent 1's teammate tracking
                     team.agents[1].teammate_ml_actions.append(
-                        {"timestamp": t, "action": "deliver_soup()"}
+                        {"timestamp": time_step, "action": "deliver_soup()"}
                     )
 
+                # Display reward information with color formatting
                 rprint("[red]" + f"r: {reward} | total: {r_total}\n\n")
+                
+                # Display agent behavior tracking
                 print(f"P0's real behavior: {team.agents[1].teammate_ml_actions}")
                 print(f"P1's real behavior: {team.agents[0].teammate_ml_actions}")
 
-                # Save per-turn statistics
-                turn_statistics_dict_agent0 = team.agents[0].turn_statistics_dict
-                turn_statistics_dict_agent1 = team.agents[1].turn_statistics_dict
+                # Collect per-turn statistics from both agents
+                turn_statistics_agent0 = team.agents[0].turn_statistics_dict
+                turn_statistics_agent1 = team.agents[1].turn_statistics_dict
 
-                turn_statistics_dict_both = combine_statistic_dict(
-                    turn_statistics_dict_agent0,
-                    turn_statistics_dict_agent1,
-                    map_str,
+                # Combine statistics from both agents with environment data
+                combined_turn_statistics = combine_statistic_dict(
+                    turn_statistics_agent0,
+                    turn_statistics_agent1,
+                    map_string,
                     reward,
                 )
 
-                statistics_dict["total_timestamp"].append(t)
+                # Update global statistics dictionary
+                statistics_dict["total_timestamp"].append(time_step)
                 statistics_dict["total_score"] = r_total
-                statistics_dict["total_action_list"][0] = team.agents[
-                    1
-                ].teammate_ml_actions
-                statistics_dict["total_action_list"][1] = team.agents[
-                    0
-                ].teammate_ml_actions
-                statistics_dict["content"].append(turn_statistics_dict_both)
+                # Note: Agent indices are swapped for teammate action tracking
+                statistics_dict["total_action_list"][0] = team.agents[1].teammate_ml_actions
+                statistics_dict["total_action_list"][1] = team.agents[0].teammate_ml_actions
+                statistics_dict["content"].append(combined_turn_statistics)
 
-                with open(filename, "w") as f:
-                    json.dump(statistics_dict, f, indent=4)
+                # Save statistics to file after each turn
+                with open(filename, "w") as statistics_file:
+                    json.dump(statistics_dict, statistics_file, indent=4)
 
+                # Check for task completion in fixed task mode
                 if variant["test_mode"] == "fix_task" and reward != 0:
                     print("Task succeeded!")
                     if variant["gpt_model"] == "human":
@@ -304,25 +357,23 @@ if __name__ == "__main__":
         "--debug", type=boolean_argument, default=True, help="debug mode"
     )
     parser.add_argument("--order", type=str, default="", help="1 task order name")
-
     parser.add_argument(
         "--statistics_save_dir",
         type=str,
         default="data",
         help="save directory of LLM statistics",
     )
-
-    parser.add_argument(
-        "--openai",
-        type=boolean_argument,
-        default=False,
-        help="Enable OpenAI API usage for embeddings and evaluations",
-    )
+    # parser.add_argument(
+    #     "--openai",
+    #     type=boolean_argument,
+    #     default=False,
+    #     help="Enable OpenAI API usage",
+    # )
 
     args = parser.parse_args()
     variant = vars(args)
-    config.cfg.set("settings", "openai_enabled", str(args.openai))
-    config.save()
+    # config.cfg.set("settings", "openai_enabled", str(args.openai))
+    # config.save()
 
     start_time = time.time()
     main(variant)
