@@ -6,6 +6,20 @@ import openai
 from overcooked_ai_py.mdp.actions import Action, Direction
 
 
+def is_openai_model(model_name):
+    """
+    Check if the given model name corresponds to an OpenAI model.
+    Returns True for OpenAI models (gpt-*, openai models), False otherwise.
+    """
+    if not model_name:
+        print('is model name not an openai model? 👹')
+        return False
+
+    model_name_lower = model_name.lower()
+    openai_indicators = ["gpt-", "openai", "chatgpt", "davinci", "curie", "babbage", "ada"]
+
+    return any(indicator in model_name_lower for indicator in openai_indicators)
+
 def convert_messages_to_prompt(messages):
     """
     Converts a list of messages(for chat) to a prompt (for completion) for OpenAI's API.

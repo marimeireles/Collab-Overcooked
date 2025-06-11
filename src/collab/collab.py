@@ -19,13 +19,12 @@ from overcooked_ai_py.planning.search import (find_path, get_intersect_counter,
 from rich import print as rprint
 
 from collab.modules import if_two_sentence_similar_meaning
-from config import cfg
 
 from .modules import Module, statistics_dict, turn_statistics_dict
+from .utils import is_openai_model
 
 cwd = os.getcwd()
-if cfg.getboolean("settings", "openai_enabled"):
-    openai_key_file = os.path.join(cwd, "openai_key.txt")
+openai_key_file = os.path.join(cwd, "openai_key.txt")
 PROMPT_DIR = os.path.join(cwd, "prompts")
 
 NAME_TO_ACTION = {
@@ -39,7 +38,6 @@ NAME_TO_ACTION = {
 
 
 class LLMPair(object):
-
     def __init__(
         self,
         model="gpt-3.5-turbo-0301",
@@ -51,24 +49,32 @@ class LLMPair(object):
         self.model_dirname = model_dirname
         self.local_server_api = local_server_api
 
-        if cfg.getboolean("settings", "openai_enabled"):
+        # Check if this specific agent uses an OpenAI model
+        if is_openai_model(model):
+            print('🐸')
             self.openai_api_keys = []
             self.load_openai_keys()
         self.key_rotation = True
         self.proxy = "http://10.29.202.138:7890"
 
     def load_openai_keys(self):
+        openai_key_file = os.path.join(os.getcwd(), "openai_key.txt")
         with open(openai_key_file, "r") as f:
             context = f.read()
         self.openai_api_keys = context.split("\n")
 
     def openai_api_key(self):
+        print('🌈🦄🌈', self.model)
+        if not hasattr(self, 'openai_api_keys') or not self.openai_api_keys:
+            raise AttributeError("OpenAI API keys not loaded. This agent doesn't use an OpenAI model.")
         if self.key_rotation:
             self.update_openai_key()
         return self.openai_api_keys[0]
 
     def update_openai_key(self):
-        self.openai_api_keys.append(self.openai_api_keys.pop(0))
+        print('🦄🌈🦄', self.model)
+        if hasattr(self, 'openai_api_keys') and self.openai_api_keys:
+            self.openai_api_keys.append(self.openai_api_keys.pop(0))
 
     def set_agent_index(self, agent_index):
         raise NotImplementedError
@@ -1169,7 +1175,7 @@ class LLMAgents(LLMPair):
                 + "\n\n<END>Now please return correct answer with your loss part.",
             }
             # print(self.planner.current_user_message)
-            if cfg.getboolean("settings", "openai_enabled"):
+            if is_openai_model(self.model):
                 response, correction_tokens = self.planner.query(
                     key=self.openai_api_key(),
                     proxy=self.proxy,
@@ -1180,6 +1186,7 @@ class LLMAgents(LLMPair):
                 response, correction_tokens = self.planner.query(
                     key="", proxy=self.proxy, stop="Scene", trace=True
                 )
+                print('🦋 model thats currently active:', self.model)
                 print(
                     "⚠️ Warning: OpenAI API is disabled. Skipping error handling (?Not sure?) in 'important_part_no_create'"
                 )
@@ -1204,7 +1211,7 @@ class LLMAgents(LLMPair):
                     + str(retry_num_max)
                     + " times"
                 )
-                parse_result = "You do not have " + part_type + " last time."
+                parse_result = "You did not " + part_type + " last iteration."
             if parse_result != "":
                 # correction_num means the number of truly correct the format error ,maybe a success need several trys.
                 # correction_tokens means all the tokens for trying, so len(correction_tokens)>= correction_num
@@ -1224,11 +1231,13 @@ class LLMAgents(LLMPair):
             "role": "user",
             "content": self.state_prompt + message,
         }
-        if cfg.getboolean("settings", "openai_enabled"):
+        if is_openai_model(self.model):
+            print('🦋 model thats currently active:', self.model)
             response, correction_tokens = self.planner.query(
                 key=self.openai_api_key(), proxy=self.proxy, stop="Scene", trace=True
             )
         else:
+            print('🦋 model thats currently active:', self.model)
             # For open source models, we don't need an API key
             response, correction_tokens = self.planner.query(
                 key="", proxy=self.proxy, stop="Scene", trace=True
@@ -1294,15 +1303,16 @@ class LLMAgents(LLMPair):
         for d in self.planner.dialog_history_list:
             # embedding for every dialog of agent
             if d["role"] == "talk":
-                if cfg.getboolean("settings", "openai_enabled"):
+                if is_openai_model(self.model):
                     if if_two_sentence_similar_meaning(
-                        self.openai_api_key(), self.proxy, d["content"], parse_talk
+                        self.model, self.openai_api_key(), self.proxy, d["content"], parse_talk
                     ):
                         return True, response
                 else:
                     response, correction_tokens = self.planner.query(
                         key="", proxy=self.proxy, stop="Scene", trace=True
                     )
+                    print('🦋 model thats currently active:', self.model)
                     print(
                         "⚠️ Warning: OpenAI API is disabled. Skipping 'if_two_sentence_similar_meaning'."
                     )
@@ -1427,7 +1437,7 @@ class LLMAgents(LLMPair):
             "content": self.state_prompt + message + failure_message + success_message,
         }
         print(f"rethink input content: {self.planner.current_user_message['content']}")
-        if cfg.getboolean("settings", "openai_enabled"):
+        if is_openai_model(self.model):
             response, correction_tokens = self.planner.query(
                 key=self.openai_api_key(),
                 proxy=self.proxy,
@@ -1439,6 +1449,7 @@ class LLMAgents(LLMPair):
             response, correction_tokens = self.planner.query(
                 key="", proxy=self.proxy, stop="Scene", trace=True
             )
+            print('🦋 model thats currently active:', self.model)
             print(
                 "⚠️ Warning: OpenAI API is disabled. Rethinking is disabled 'generate_rethink'."
             )
@@ -1545,7 +1556,8 @@ class LLMAgents(LLMPair):
             
             # The Module.query() method handles both OpenAI and open source models
             # based on the model name, so we can always call it
-            if cfg.getboolean("settings", "openai_enabled"):
+            if is_openai_model(self.model):
+                print('🦋 model thats currently active:', self.model)
                 response, token_count = self.planner.query(
                     key=self.openai_api_key(),
                     proxy=self.proxy,
@@ -1554,6 +1566,7 @@ class LLMAgents(LLMPair):
                     map=self.mdp.state_string(self.state).replace("ø", "o"),
                 )
             else:
+                print('🦋 model thats currently active:', self.model)
                 response, token_count = self.planner.query(
                     key="",
                     proxy=self.proxy,

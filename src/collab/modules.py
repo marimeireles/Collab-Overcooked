@@ -10,28 +10,20 @@ from rich import print as rprint
 from scipy import spatial
 from transformers import AutoTokenizer
 
-from .utils import convert_messages_to_prompt, retry_with_exponential_backoff
+from .utils import convert_messages_to_prompt, retry_with_exponential_backoff, is_openai_model
 from .web_util import listen_to_server, output_to_port, username_record
-from config import cfg
 
 cwd = os.getcwd()
 # deepseek_key_file = os.path.join(cwd, "deepseek_key.txt")
+openai_key_file = os.path.join(cwd, "openai_key.txt")
 
-if cfg.getboolean("settings", "openai_enabled"):
-    openai_key_file = os.path.join(cwd, "openai_key.txt")
+# Always import OpenAI for API compatibility (needed for both OpenAI and local servers)
+import openai
+from openai import OpenAI
 
-    import openai
-    from openai import OpenAI
-    
-    if os.path.exists(openai_key_file):
-        with open(openai_key_file, "r") as f:
-            context = f.read()
-        openai_key = context.split("\n")[0]
-else:
-    # For open source models, we still need the OpenAI import for API compatibility
-    # but we use it with local servers
-    from openai import OpenAI
-    openai_key = ""
+with open(openai_key_file, "r") as f:
+    context = f.read()
+openai_key = context.split("\n")[0]
 
 # global statistics
 statistics_dict = {
@@ -381,7 +373,8 @@ COOKING STEPs:
 """  # get embedding for current input
         # if user set up openai add a custom key, otherwise, use empty key
         key = ""
-        if cfg.getboolean("settings", "openai_enabled"):
+        if self.is_openai_model(self.model):
+            print('🦋 model thats currently active:', self.model)
             with open(openai_key_file, "r") as f:
                 context = f.read()
             key = context.split("\n")[0]
@@ -423,26 +416,27 @@ COOKING STEPs:
         return result
 
 
-def if_two_sentence_similar_meaning(key, proxy, sentence1, sentence2):
+def if_two_sentence_similar_meaning(model, key, proxy, sentence1, sentence2):
     # If OpenAI is disabled, use a simple fallback
     key = ""
-    if not cfg.getboolean("settings", "openai_enabled"):
+    if not is_openai_model(model):
+        print('🦋 model thats currently active:', model)
         print("⚠️ Warning: OpenAI API is disabled. Using simple similarity check.")
         # Simple token-based similarity as fallback
         import re
         tokens1 = set(re.findall(r"\w+", sentence1.lower()))
         tokens2 = set(re.findall(r"\w+", sentence2.lower()))
-        
+
         if not tokens1 or not tokens2:
             return False
-        
+
         intersection = len(tokens1.intersection(tokens2))
         union = len(tokens1.union(tokens2))
         jaccard_sim = intersection / union if union > 0 else 0
         return jaccard_sim > 0.8
     
     # If OpenAI is enabled, get the API key
-    if cfg.getboolean("settings", "openai_enabled"):
+    if is_openai_model(model):
         with open(openai_key_file, "r") as f:
             context = f.read()
         key = context.split("\n")[0]

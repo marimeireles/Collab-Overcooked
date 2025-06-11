@@ -12,7 +12,6 @@ from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
 from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
 from rich import print as rprint
 
-import config
 from collab.modules import statistics_dict
 from collab.web_util import change_port, check_port_in_use, output_to_port
 from utils import combine_statistic_dict, make_agent
@@ -26,19 +25,6 @@ def boolean_argument(value):
     """Convert a string value to boolean."""
     return bool(strtobool(value))
 
-
-def is_openai_model(model_name):
-    """
-    Check if the given model name corresponds to an OpenAI model.
-    Returns True for OpenAI models (gpt-*, openai models), False otherwise.
-    """
-    if not model_name:
-        return False
-    
-    model_name_lower = model_name.lower()
-    openai_indicators = ["gpt-", "openai", "chatgpt", "davinci", "curie", "babbage", "ada"]
-    
-    return any(indicator in model_name_lower for indicator in openai_indicators)
 
 
 def check_recipe_parse(variant):
@@ -110,46 +96,53 @@ def main(variant):
             # Exit after first develop run
             break
 
-        # Build both agents
-        agents_list = []
-        for actor_idx, alg in enumerate([variant["p0"], variant["p1"]]):
-            if alg == "LLMPair":
-                # Validate that a GPT model is provided
-                if mode != "human" and not variant["gpt_model"]:
-                    raise ValueError(
-                        "You must specify a model using --gpt_model when not in human mode"
-                    )
+        # Build P0 agent (chef)
+        p0_model = variant["p0_gpt_model"] or variant["gpt_model"]
+        p0_model_dirname = variant["p0_model_dirname"] or variant["model_dirname"]
+        p0_local_server_api = variant["p0_local_server_api"] or variant["local_server_api"]
+        
+        if variant["p0"] == "LLMPair":
+            if mode != "human" and not p0_model:
+                raise ValueError("You must specify a model for P0 using --p0_gpt_model or --gpt_model")
+            if mode == "OpenSource" and not os.path.exists(p0_model_dirname):
+                raise ValueError(f"P0 model directory not found: {p0_model_dirname}")
+            if p0_model == "human":
+                if not check_port_in_use(p0_local_server_api):
+                    raise ValueError(f"P0 port {p0_local_server_api} is not in use")
+                change_port(p0_local_server_api)
+            print(f"\n----P0 using model: {p0_model}----\n")
+            p0_agent = make_agent("LLMPair", mdp, layout,
+                                model=p0_model, model_dirname=p0_model_dirname,
+                                local_server_api=p0_local_server_api,
+                                retrival_method=variant["retrival_method"],
+                                K=variant["K"], actor="chef")
+        else:
+            p0_agent = make_agent(variant["p0"], mdp, layout)
 
-                if mode == "OpenSource":
-                    if not os.path.exists(variant["model_dirname"]):
-                        raise ValueError(
-                            f"Model directory not found: {variant['model_dirname']}"
-                        )
-                    print(f"Using open source model from: {variant['model_dirname']}")
+        # Build P1 agent (assistant)
+        p1_model = variant["p1_gpt_model"] or variant["gpt_model"]
+        p1_model_dirname = variant["p1_model_dirname"] or variant["model_dirname"]
+        p1_local_server_api = variant["p1_local_server_api"] or variant["local_server_api"]
+        
+        if variant["p1"] == "LLMPair":
+            if mode != "human" and not p1_model:
+                raise ValueError("You must specify a model for P1 using --p1_gpt_model or --gpt_model")
+            if mode == "OpenSource" and not os.path.exists(p1_model_dirname):
+                raise ValueError(f"P1 model directory not found: {p1_model_dirname}")
+            if p1_model == "human":
+                if not check_port_in_use(p1_local_server_api):
+                    raise ValueError(f"P1 port {p1_local_server_api} is not in use")
+                change_port(p1_local_server_api)
+            print(f"\n----P1 using model: {p1_model}----\n")
+            p1_agent = make_agent("LLMPair", mdp, layout,
+                                model=p1_model, model_dirname=p1_model_dirname,
+                                local_server_api=p1_local_server_api,
+                                retrival_method=variant["retrival_method"],
+                                K=variant["K"], actor="assistant")
+        else:
+            p1_agent = make_agent(variant["p1"], mdp, layout)
 
-                if variant["gpt_model"] == "human":
-                    if not check_port_in_use(variant["local_server_api"]):
-                        raise ValueError(
-                            f"Port {variant['local_server_api']} is not in use"
-                        )
-                    change_port(variant["local_server_api"])
-                    print("Running in human mode with local server")
-
-                print(f"\n----Using model: {variant['gpt_model']}----\n")
-                agent = make_agent(
-                    alg,
-                    mdp,
-                    layout,
-                    model=variant["gpt_model"],
-                    model_dirname=variant["model_dirname"],
-                    local_server_api=variant["local_server_api"],
-                    retrival_method=variant["retrival_method"],
-                    K=variant["K"],
-                    actor=actor_list[actor_idx],
-                )
-            else:
-                agent = make_agent(alg, mdp, layout)
-            agents_list.append(agent)
+        agents_list = [p0_agent, p1_agent]
 
         team = AgentGroup(*agents_list)
         team.reset()
@@ -169,26 +162,18 @@ def main(variant):
                 # Convert and display the current map state (replace special characters)
                 map_string = env.mdp.state_string(current_state).replace("ø", "o")
                 print(map_string)
-
-                # Check if Player 0 is using an OpenAI model and manage config accordingly
-                p0_is_openai = (variant["p0"] == "LLMPair" and 
-                               is_openai_model(variant["gpt_model"]))
                 
-                # Set OpenAI config flag if Player 0 uses OpenAI model
-                if p0_is_openai:
-                    config.cfg.set("settings", "openai_enabled", str(True))
-                    config.save()
-                    print('☀️B☀️E☀️G☀️I☀️N')
-                try:
-                    # Get joint action from both agents and any ingredient pickup parameters
-                    joint_action, ingredient_for_pickup = team.joint_action(current_state)
-                    print(joint_action)
-                finally:
-                    # Always reset OpenAI config flag back to False after Player 0's action
-                    if p0_is_openai:
-                        config.cfg.set("settings", "openai_enabled", str(False))
-                        config.save()
-                        print('☀️E☀️N☀️D')
+                print('☀️B☀️E☀️G☀️I☀️N')
+                # Get joint action from both agents and any ingredient pickup parameters
+                # TODO: crap, this comes from the lib, need to inspect tomorrow whether this
+                # has an action taking function that's separated or if it's only this joint
+                # thing. inspecting the code ive already learned it's separated actions and then
+                # they join it as a tuple, so it's not going to be disgustingly difficult
+                # just annoying to  transmit this informtion somehow....
+                # I have no idea how actually
+                joint_action, ingredient_for_pickup = team.joint_action(current_state)
+                print(joint_action)
+                print('☀️E☀️N☀️D')
                 
                 # Reset and get dialogue between agents
                 dialogue_turn = team.reset_dialogue()
@@ -261,24 +246,16 @@ def main(variant):
                 # Check for task completion in fixed task mode
                 if variant["test_mode"] == "fix_task" and reward != 0:
                     print("Task succeeded!")
-                    if variant["gpt_model"] == "human":
-                        for a in range(len(team.agents)):
-                            output_to_port(
-                                f"agent{a}",
-                                "Success!",
-                                mission="success",
-                                port=variant["local_server_api"],
-                            )
+                    if p0_model == "human":
+                        output_to_port("agent0", "Success!", mission="success", port=p0_local_server_api)
+                    if p1_model == "human":
+                        output_to_port("agent1", "Success!", mission="success", port=p1_local_server_api)
                     break
 
-            if variant["gpt_model"] == "human":
-                for a in range(len(team.agents)):
-                    output_to_port(
-                        f"agent{a}",
-                        "Fail to finish task in time!",
-                        mission="fail",
-                        port=variant["local_server_api"],
-                    )
+            if p0_model == "human":
+                output_to_port("agent0", "Fail to finish task in time!", mission="fail", port=p0_local_server_api)
+            if p1_model == "human":
+                output_to_port("agent1", "Fail to finish task in time!", mission="fail", port=p1_local_server_api)
 
         print(f"Episode {i + 1}/{episode}: {r_total}\n====\n\n")
         results.append(r_total)
@@ -315,7 +292,19 @@ if __name__ == "__main__":
         "--gpt_model",
         type=str,
         default="gpt-3.5-turbo-0125",
-        help="LLM model (e.g. gpt-4, llama3-8B)",
+        help="LLM model (e.g. gpt-4, llama3-8B) - used when p0_gpt_model and p1_gpt_model are not specified",
+    )
+    parser.add_argument(
+        "--p0_gpt_model",
+        type=str,
+        default=None,
+        help="LLM model for P0 agent (overrides --gpt_model for P0)",
+    )
+    parser.add_argument(
+        "--p1_gpt_model",
+        type=str,
+        default=None,
+        help="LLM model for P1 agent (overrides --gpt_model for P1)",
     )
     parser.add_argument(
         "--retrival_method",
@@ -331,13 +320,37 @@ if __name__ == "__main__":
         "--model_dirname",
         type=str,
         default=".",
-        help="Absolute path of open-source model directory",
+        help="Absolute path of open-source model directory - used when p0_model_dirname and p1_model_dirname are not specified",
+    )
+    parser.add_argument(
+        "--p0_model_dirname",
+        type=str,
+        default=None,
+        help="Absolute path of open-source model directory for P0 agent (overrides --model_dirname for P0)",
+    )
+    parser.add_argument(
+        "--p1_model_dirname",
+        type=str,
+        default=None,
+        help="Absolute path of open-source model directory for P1 agent (overrides --model_dirname for P1)",
     )
     parser.add_argument(
         "--local_server_api",
         type=str,
         default="http://localhost:8000/v1",
-        help="URL for local LLM server",
+        help="URL for local LLM server - used when p0_local_server_api and p1_local_server_api are not specified",
+    )
+    parser.add_argument(
+        "--p0_local_server_api",
+        type=str,
+        default=None,
+        help="URL for local LLM server for P0 agent (overrides --local_server_api for P0)",
+    )
+    parser.add_argument(
+        "--p1_local_server_api",
+        type=str,
+        default=None,
+        help="URL for local LLM server for P1 agent (overrides --local_server_api for P1)",
     )
     parser.add_argument(
         "--mode",
@@ -363,17 +376,9 @@ if __name__ == "__main__":
         default="data",
         help="save directory of LLM statistics",
     )
-    # parser.add_argument(
-    #     "--openai",
-    #     type=boolean_argument,
-    #     default=False,
-    #     help="Enable OpenAI API usage",
-    # )
 
     args = parser.parse_args()
     variant = vars(args)
-    # config.cfg.set("settings", "openai_enabled", str(args.openai))
-    # config.save()
 
     start_time = time.time()
     main(variant)
