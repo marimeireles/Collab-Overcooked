@@ -9,6 +9,7 @@ import tiktoken
 from rich import print as rprint
 from scipy import spatial
 from transformers import AutoTokenizer
+from sentence_transformers import SentenceTransformer
 
 from .utils import convert_messages_to_prompt, retry_with_exponential_backoff, is_openai_model
 from .web_util import listen_to_server, output_to_port, username_record
@@ -20,6 +21,12 @@ openai_key_file = os.path.join(cwd, "openai_key.txt")
 # Always import OpenAI for API compatibility (needed for both OpenAI and local servers)
 import openai
 from openai import OpenAI
+
+from sentence_transformers import SentenceTransformer
+from scipy.spatial.distance import cosine
+
+# Initialize sentence transformer model globally
+EMBEDDING_MODEL = SentenceTransformer('all-MiniLM-L6-v2')
 
 with open(openai_key_file, "r") as f:
     context = f.read()
@@ -99,7 +106,6 @@ TOKEN_LIMIT_TABLE = {
     "llama3:70b-instruct-fp16": 4096,
 }
 sys.path.append(os.getcwd())
-EMBEDDING_MODEL = "text-embedding-3-small"
 
 
 class Module(object):
@@ -352,7 +358,6 @@ class Module(object):
         if k == 0:
             return ""
 
-            
         prompt_begin_chef = "Here are few examples to teach you the usage of your skills, but these are just some examples, you need to flexibly apply your skills according to the specific environment.\
 You should make plan for yourself in 'Chef plan', and make plan for assistant by saying to him.\n"
         prompt_begin_assistant = "Here are few examples to teach you the usage of your skills, but these are just some examples, you need to flexibly apply your skills according to the specific environment.\
@@ -415,52 +420,30 @@ COOKING STEPs:
 
         return result
 
+# Load an open-source, pre-trained sentence-embedding model
+# You can swap in any model from https://www.sbert.net/docs/pretrained_models.html
+_MODEL_NAME = "all-mpnet-base-v2"
+_model = SentenceTransformer(_MODEL_NAME)
 
-def if_two_sentence_similar_meaning(model, key, proxy, sentence1, sentence2):
-    # If OpenAI is disabled, use a simple fallback
-    key = ""
-    if not is_openai_model(model):
-        print('🦋 model thats currently active:', model)
-        print("⚠️ Warning: OpenAI API is disabled. Using simple similarity check.")
-        # Simple token-based similarity as fallback
-        import re
-        tokens1 = set(re.findall(r"\w+", sentence1.lower()))
-        tokens2 = set(re.findall(r"\w+", sentence2.lower()))
-
-        if not tokens1 or not tokens2:
-            return False
-
-        intersection = len(tokens1.intersection(tokens2))
-        union = len(tokens1.union(tokens2))
-        jaccard_sim = intersection / union if union > 0 else 0
-        return jaccard_sim > 0.8
-    
-    # If OpenAI is enabled, get the API key
-    if is_openai_model(model):
-        with open(openai_key_file, "r") as f:
-            context = f.read()
-        key = context.split("\n")[0]
-        openai.api_key = key
-
-    if sentence1 == "":
+def if_two_sentence_similar_meaning(
+    sentence1: str,
+    sentence2: str,
+    threshold: float = 0.9
+) -> bool:
+    """
+    Returns True if the semantic similarity between sentence1 and sentence2
+    exceeds the given threshold, using an open-source SentenceTransformer model.
+    """
+    # Handle empty sentences, as in your original
+    if not sentence1:
         sentence1 = " "
-    if sentence2 == "":
+    if not sentence2:
         sentence2 = " "
-    get_response = False
-    while not get_response:
-        try:
-            client = OpenAI(api_key=key)
-            response = client.embeddings.create(
-                model=EMBEDDING_MODEL, input=[sentence1, sentence2]
-            )
-            get_response = True
-        except Exception as e:
-            rprint("[red][OPENAI ERROR][/red]:", e)
-            time.sleep(1)
-    embedding_1 = response.data[0].embedding
-    embedding_2 = response.data[1].embedding
-    score = 1 - spatial.distance.cosine(embedding_1, embedding_2)
-    if score > 0.9:
-        return True
-    else:
-        return False
+
+    # Compute embeddings for both sentences
+    embeddings = _model.encode([sentence1, sentence2], convert_to_tensor=False)
+
+    # Cosine similarity: 1 - cosine distance
+    score = 1.0 - cosine(embeddings[0], embeddings[1])
+
+    return score > threshold
