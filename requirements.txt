@@ -17,5 +17,7 @@ plotly
 aiohttp
 gym
 httpx==0.27.2
+sentence_transformers==3.2.1
+scipy
 websocket
 websockets
