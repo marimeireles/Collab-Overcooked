@@ -39,6 +39,52 @@ def check_recipe_parse(variant):
     raise ValueError("Not valid order name!")
 
 
+def build_agent(variant, key, actor, mdp, layout, mode):
+    """Create an agent (P0 or P1) based on the provided configuration key.
+
+    Parameters
+    ----------
+    variant : dict
+        Parsed command-line arguments.
+    key : str
+        Either "p0" or "p1" - used to look up per-player flags.
+    actor : str
+        "chef" for P0, "assistant" for P1 - forwarded to make_agent.
+    mdp, layout, mode
+        Environment and mode information forwarded from main.
+    """
+    model = variant[f"{key}_gpt_model"] or variant["gpt_model"]
+    model_dirname = variant[f"{key}_model_dirname"] or variant["model_dirname"]
+    local_server_api = variant[f"{key}_local_server_api"] or variant["local_server_api"]
+    algo = variant[key]
+
+    if algo == "LLMPair":
+        if mode != "human" and not model:
+            raise ValueError(
+                f"You must specify a model for {key.upper()} using --{key}_gpt_model or --gpt_model"
+            )
+        if mode == "OpenSource" and not os.path.exists(model_dirname):
+            raise ValueError(f"{key.upper()} model directory not found: {model_dirname}")
+        if model == "human":
+            if not check_port_in_use(local_server_api):
+                raise ValueError(f"{key.upper()} port {local_server_api} is not in use")
+            change_port(local_server_api)
+        print(f"\n----{key.upper()} using model: {model}----\n")
+        return make_agent(
+            "LLMPair",
+            mdp,
+            layout,
+            model=model,
+            model_dirname=model_dirname,
+            local_server_api=local_server_api,
+            retrival_method=variant["retrival_method"],
+            K=variant["K"],
+            actor=actor,
+        )
+    else:
+        return make_agent(algo, mdp, layout)
+
+
 def main(variant):
     layout = variant["layout"]
     horizon = variant["horizon"]
@@ -59,8 +105,6 @@ def main(variant):
 
     start_time = time.time()
     results = []
-
-    actor_list = ["chef", "assistant"]
 
     for i in range(episode):
         # Directory and filename for saving statistics
@@ -96,53 +140,15 @@ def main(variant):
             # Exit after first develop run
             break
 
-        # Build P0 agent (chef)
+        # Build agents (P0 – chef, P1 – assistant) with shared helper
         p0_model = variant["p0_gpt_model"] or variant["gpt_model"]
-        p0_model_dirname = variant["p0_model_dirname"] or variant["model_dirname"]
-        p0_local_server_api = variant["p0_local_server_api"] or variant["local_server_api"]
-        
-        if variant["p0"] == "LLMPair":
-            if mode != "human" and not p0_model:
-                raise ValueError("You must specify a model for P0 using --p0_gpt_model or --gpt_model")
-            if mode == "OpenSource" and not os.path.exists(p0_model_dirname):
-                raise ValueError(f"P0 model directory not found: {p0_model_dirname}")
-            if p0_model == "human":
-                if not check_port_in_use(p0_local_server_api):
-                    raise ValueError(f"P0 port {p0_local_server_api} is not in use")
-                change_port(p0_local_server_api)
-            print(f"\n----P0 using model: {p0_model}----\n")
-            p0_agent = make_agent("LLMPair", mdp, layout,
-                                model=p0_model, model_dirname=p0_model_dirname,
-                                local_server_api=p0_local_server_api,
-                                retrival_method=variant["retrival_method"],
-                                K=variant["K"], actor="chef")
-        else:
-            p0_agent = make_agent(variant["p0"], mdp, layout)
-
-        # Build P1 agent (assistant)
         p1_model = variant["p1_gpt_model"] or variant["gpt_model"]
-        p1_model_dirname = variant["p1_model_dirname"] or variant["model_dirname"]
-        p1_local_server_api = variant["p1_local_server_api"] or variant["local_server_api"]
-        
-        if variant["p1"] == "LLMPair":
-            if mode != "human" and not p1_model:
-                raise ValueError("You must specify a model for P1 using --p1_gpt_model or --gpt_model")
-            if mode == "OpenSource" and not os.path.exists(p1_model_dirname):
-                raise ValueError(f"P1 model directory not found: {p1_model_dirname}")
-            if p1_model == "human":
-                if not check_port_in_use(p1_local_server_api):
-                    raise ValueError(f"P1 port {p1_local_server_api} is not in use")
-                change_port(p1_local_server_api)
-            print(f"\n----P1 using model: {p1_model}----\n")
-            p1_agent = make_agent("LLMPair", mdp, layout,
-                                model=p1_model, model_dirname=p1_model_dirname,
-                                local_server_api=p1_local_server_api,
-                                retrival_method=variant["retrival_method"],
-                                K=variant["K"], actor="assistant")
-        else:
-            p1_agent = make_agent(variant["p1"], mdp, layout)
 
-        agents_list = [p0_agent, p1_agent]
+        player_configs = [("p0", "chef"), ("p1", "assistant")]
+        agents_list = [
+            build_agent(variant, player_key, actor, mdp, layout, mode)
+            for player_key, actor in player_configs
+        ]
 
         team = AgentGroup(*agents_list)
         team.reset()
