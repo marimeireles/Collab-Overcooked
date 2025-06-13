@@ -171,19 +171,13 @@ def main(variant):
                 
                 print('☀️B☀️E☀️G☀️I☀️N')
                 # Get joint action from both agents and any ingredient pickup parameters
-                # TODO: crap, this comes from the lib, need to inspect tomorrow whether this
-                # has an action taking function that's separated or if it's only this joint
-                # thing. inspecting the code ive already learned it's separated actions and then
-                # they join it as a tuple, so it's not going to be disgustingly difficult
-                # just annoying to  transmit this informtion somehow....
-                # I have no idea how actually
                 joint_action, ingredient_for_pickup = team.joint_action(current_state)
                 print(joint_action)
                 print('☀️E☀️N☀️D')
-                
+
                 # Reset and get dialogue between agents
                 dialogue_turn = team.reset_dialogue()
-                
+
                 print(f"\n-----------Controller-----------\n")
                 print(
                     f"action: P0 {Action.to_char(joint_action[0])} | P1 {Action.to_char(joint_action[1])}"
@@ -253,15 +247,15 @@ def main(variant):
                 if variant["test_mode"] == "fix_task" and reward != 0:
                     print("Task succeeded!")
                     if p0_model == "human":
-                        output_to_port("agent0", "Success!", mission="success", port=p0_local_server_api)
+                        output_to_port("agent0", "Success!", mission="success", port=variant["p0_local_server_api"])
                     if p1_model == "human":
-                        output_to_port("agent1", "Success!", mission="success", port=p1_local_server_api)
+                        output_to_port("agent1", "Success!", mission="success", port=variant["p1_local_server_api"])
                     break
 
             if p0_model == "human":
-                output_to_port("agent0", "Fail to finish task in time!", mission="fail", port=p0_local_server_api)
+                output_to_port("agent0", "Fail to finish task in time!", mission="fail", port=variant["p0_local_server_api"])
             if p1_model == "human":
-                output_to_port("agent1", "Fail to finish task in time!", mission="fail", port=p1_local_server_api)
+                output_to_port("agent1", "Fail to finish task in time!", mission="fail", port=variant["p1_local_server_api"])
 
         print(f"Episode {i + 1}/{episode}: {r_total}\n====\n\n")
         results.append(r_total)
