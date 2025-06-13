@@ -446,4 +446,10 @@ def if_two_sentence_similar_meaning(
     # Cosine similarity: 1 - cosine distance
     score = 1.0 - cosine(embeddings[0], embeddings[1])
 
-    return score > threshold
+    # Ensure threshold is a float; fall back to default if conversion fails
+    try:
+        threshold_val = float(threshold)
+    except (TypeError, ValueError):
+        threshold_val = 0.9  # default fallback
+
+    return score > threshold_val

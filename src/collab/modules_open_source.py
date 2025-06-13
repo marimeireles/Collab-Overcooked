@@ -34,7 +34,7 @@ class OpenSourceModule:
 
         embeddings = self.get_local_embeddings([sentence1, sentence2])
         score = 1 - spatial.distance.cosine(embeddings[0], embeddings[1])
-        return score > threshold
+        return int(score) > threshold
 
     def get_top_k_similar_example_local(self, input_text, examples_df, k=4):
         """Replace OpenAI embeddings in retrieval with local model"""

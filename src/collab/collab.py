@@ -1305,7 +1305,7 @@ class LLMAgents(LLMPair):
             if d["role"] == "talk":
                 if is_openai_model(self.model):
                     if if_two_sentence_similar_meaning(
-                        self.model, self.openai_api_key(), self.proxy, d["content"], parse_talk
+                        d["content"], parse_talk
                     ):
                         return True, response
                 else:
