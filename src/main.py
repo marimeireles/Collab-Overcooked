@@ -1,11 +1,9 @@
 import json
 import os
 import time
-import warnings
 from argparse import ArgumentParser
 from distutils.util import strtobool
 
-import importlib_metadata
 from overcooked_ai_py.agents.agent import AgentGroup
 from overcooked_ai_py.mdp.actions import Action
 from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
@@ -24,8 +22,6 @@ PROMPT_DIR = os.path.join(cwd, "prompts")
 def boolean_argument(value):
     """Convert a string value to boolean."""
     return bool(strtobool(value))
-
-
 
 def check_recipe_parse(variant):
     """
@@ -108,10 +104,16 @@ def main(variant):
 
     for i in range(episode):
         # Directory and filename for saving statistics
+        # Determine effective model names for P0 and P1 (fallbacks to --gpt_model when not provided)
+        p0_model = variant["p0_gpt_model"] or variant["gpt_model"]
+        p1_model = variant["p1_gpt_model"] or variant["gpt_model"]
+
         current_time = time.strftime("%Y-%m-%d_%H-%M-%S")
-        save_dir = f"{variant['statistics_save_dir']}/{variant['gpt_model']}/{variant['order']}"
+        # Save directory is now <statistics_save_dir>/<p0_model>_<p1_model>/<order>
+        save_dir = f"{variant['statistics_save_dir']}/{p0_model}_{p1_model}/{variant['order']}"
         os.makedirs(save_dir, exist_ok=True)
-        filename = f"{save_dir}/experiment_{current_time}_{variant['order']}.json"
+        # Filename embeds model names for clarity as well
+        filename = f"{save_dir}/experiment_{current_time}_chef_{p0_model}_assistant_{p1_model}_{variant['order']}.json"
 
         # Develop mode: user steps through action_list manually
         if mode == "develop":
@@ -141,9 +143,6 @@ def main(variant):
             break
 
         # Build agents (P0 – chef, P1 – assistant) with shared helper
-        p0_model = variant["p0_gpt_model"] or variant["gpt_model"]
-        p1_model = variant["p1_gpt_model"] or variant["gpt_model"]
-
         player_configs = [("p0", "chef"), ("p1", "assistant")]
         agents_list = [
             build_agent(variant, player_key, actor, mdp, layout, mode)
