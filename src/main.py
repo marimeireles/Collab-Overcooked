@@ -168,11 +168,9 @@ def main(variant):
                 map_string = env.mdp.state_string(current_state).replace("ø", "o")
                 print(map_string)
                 
-                print('☀️B☀️E☀️G☀️I☀️N')
                 # Get joint action from both agents and any ingredient pickup parameters
                 joint_action, ingredient_for_pickup = team.joint_action(current_state)
                 print(joint_action)
-                print('☀️E☀️N☀️D')
 
                 # Reset and get dialogue between agents
                 dialogue_turn = team.reset_dialogue()

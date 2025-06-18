@@ -1303,19 +1303,12 @@ class LLMAgents(LLMPair):
         for d in self.planner.dialog_history_list:
             # embedding for every dialog of agent
             if d["role"] == "talk":
-                if is_openai_model(self.model):
-                    if if_two_sentence_similar_meaning(
-                        d["content"], parse_talk
-                    ):
-                        return True, response
-                else:
-                    response, correction_tokens = self.planner.query(
-                        key="", proxy=self.proxy, stop="Scene", trace=True
-                    )
-                    print('🦋 model thats currently active:', self.model)
-                    print(
-                        "⚠️ Warning: OpenAI API is disabled. Skipping 'if_two_sentence_similar_meaning'."
-                    )
+                # The if_two_sentence_similar_meaning function works with both OpenAI and open source models
+                # since it uses SentenceTransformer which doesn't require OpenAI API
+                if if_two_sentence_similar_meaning(
+                    d["content"], parse_talk
+                ):
+                    return True, response
         self.planner.dialog_history_list.append({"role": "talk", "content": parse_talk})
 
         # check if there is action
