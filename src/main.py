@@ -120,9 +120,10 @@ def main(variant):
         p0_model_safe = sanitize_model_name_for_path(p0_model)
         p1_model_safe = sanitize_model_name_for_path(p1_model)
 
+        current_date = time.strftime("%Y-%m-%d")
         current_time = time.strftime("%Y-%m-%d_%H-%M-%S")
-        # Save directory is now <statistics_save_dir>/<p0_model_safe>_<p1_model_safe>/<order>
-        save_dir = f"{variant['statistics_save_dir']}/{p0_model_safe}_{p1_model_safe}/{variant['order']}"
+        # Save directory is now <statistics_save_dir>/experiment_<date>/<p0_model_safe>_<p1_model_safe>/<order>
+        save_dir = f"{variant['statistics_save_dir']}/experiment_{current_date}/{p0_model_safe}_{p1_model_safe}/{variant['order']}"
         os.makedirs(save_dir, exist_ok=True)
         # Filename embeds model names for clarity as well
         filename = f"{save_dir}/experiment_{current_time}_chef_{p0_model_safe}_assistant_{p1_model_safe}_{variant['order']}.json"
