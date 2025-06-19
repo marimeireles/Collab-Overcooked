@@ -1,5 +1,4 @@
 src/openai_key.txt
-src/data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -166,3 +165,4 @@ src/batch_run.sh
 src/embedding_cache.json
 
 
+secrets.env
