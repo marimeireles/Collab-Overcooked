@@ -23,6 +23,14 @@ def boolean_argument(value):
     """Convert a string value to boolean."""
     return bool(strtobool(value))
 
+
+def sanitize_model_name_for_path(model_name):
+    """Convert model name to filesystem-safe string by replacing problematic characters."""
+    if not model_name:
+        return model_name
+    # Replace forward slashes with underscores and other problematic characters
+    return model_name.replace("/", "_").replace(":", "_").replace(" ", "_")
+
 def check_recipe_parse(variant):
     """
     Verify that a recipe file matching variant['order'] exists under PROMPT_DIR/recipe/.
@@ -107,13 +115,17 @@ def main(variant):
         # Determine effective model names for P0 and P1 (fallbacks to --gpt_model when not provided)
         p0_model = variant["p0_gpt_model"] or variant["gpt_model"]
         p1_model = variant["p1_gpt_model"] or variant["gpt_model"]
+        
+        # Sanitize model names for filesystem use
+        p0_model_safe = sanitize_model_name_for_path(p0_model)
+        p1_model_safe = sanitize_model_name_for_path(p1_model)
 
         current_time = time.strftime("%Y-%m-%d_%H-%M-%S")
-        # Save directory is now <statistics_save_dir>/<p0_model>_<p1_model>/<order>
-        save_dir = f"{variant['statistics_save_dir']}/{p0_model}_{p1_model}/{variant['order']}"
+        # Save directory is now <statistics_save_dir>/<p0_model_safe>_<p1_model_safe>/<order>
+        save_dir = f"{variant['statistics_save_dir']}/{p0_model_safe}_{p1_model_safe}/{variant['order']}"
         os.makedirs(save_dir, exist_ok=True)
         # Filename embeds model names for clarity as well
-        filename = f"{save_dir}/experiment_{current_time}_chef_{p0_model}_assistant_{p1_model}_{variant['order']}.json"
+        filename = f"{save_dir}/experiment_{current_time}_chef_{p0_model_safe}_assistant_{p1_model_safe}_{variant['order']}.json"
 
         # Develop mode: user steps through action_list manually
         if mode == "develop":
