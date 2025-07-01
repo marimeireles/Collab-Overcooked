@@ -110,6 +110,10 @@ def main(variant):
     start_time = time.time()
     results = []
 
+    # Calculate date once at the beginning of the run to ensure all episodes use the same date
+    # even if the experiment runs past midnight
+    current_date = time.strftime("%Y-%m-%d")
+
     for i in range(episode):
         # Directory and filename for saving statistics
         # Determine effective model names for P0 and P1 (fallbacks to --gpt_model when not provided)
@@ -120,7 +124,7 @@ def main(variant):
         p0_model_safe = sanitize_model_name_for_path(p0_model)
         p1_model_safe = sanitize_model_name_for_path(p1_model)
 
-        current_date = time.strftime("%Y-%m-%d")
+        # Generate timestamp for this specific episode
         current_time = time.strftime("%Y-%m-%d_%H-%M-%S")
         # Save directory is now <statistics_save_dir>/experiment_<date>/<p0_model_safe>_<p1_model_safe>/<order>
         save_dir = f"{variant['statistics_save_dir']}/experiment_{current_date}/{p0_model_safe}_{p1_model_safe}/{variant['order']}"
