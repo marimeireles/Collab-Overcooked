@@ -1059,13 +1059,23 @@ class Evaluation:
         return transition_matrix
 
     def compute_task_metrics(self):
-        total_timestamp = self.exp_log.get_successed_timestamp
+        # Get timestamps from successful experiments for time metrics
+        successed_timestamp = self.exp_log.get_successed_timestamp
         time_finish = []
-        for timestamp_log in total_timestamp:
-            time_finish.append(timestamp_log[-1])
+        for timestamp_log in successed_timestamp:
+            time_finish.append(len(timestamp_log[0]))
+        
+        # Get steps from ALL experiments (successful and failed)
+        all_timestamps = self.exp_log.get_total_timestamp
+        steps = 0
+        if all_timestamps:
+            # Take the length of the first experiment's timestamp (regardless of success/failure)
+            steps = len(all_timestamps[0])
+        
         success_rate = self.exp_log.successed / (
             self.exp_log.successed + self.exp_log.failed
         )
+        
         if success_rate == 0:
             time_avg = 0
             time_var = 0
@@ -1076,6 +1086,7 @@ class Evaluation:
         task_metrics = {
             "time_avg": time_avg,
             "time_var": time_var,
+            "steps": steps,
             "success_rate": success_rate,
         }
 

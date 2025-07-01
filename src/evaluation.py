@@ -76,6 +76,89 @@ def main(variant):
                     auto_order_list.append(variant["order"])
                 eval = Evaluation(order_name_list=auto_order_list, exp_log=exp_log)
 
+        if variant["test_mode"] == "custom_dir":
+            # New mode: handles 3-level structure (experiment_date/model_combination/task)
+            # Discover all model combinations and tasks automatically
+            base_dir = variant["log_dir"]
+            
+            if not os.path.exists(base_dir):
+                print(f"Error: Directory {base_dir} does not exist.")
+                return
+            
+            # Find all model combination directories
+            model_combinations = [d for d in os.listdir(base_dir) 
+                                if os.path.isdir(os.path.join(base_dir, d))]
+            
+            if not model_combinations:
+                print(f"No model combination directories found in {base_dir}")
+                return
+            
+            print(f"Found {len(model_combinations)} model combinations:")
+            for combo in model_combinations:
+                print(f"  - {combo}")
+            
+            # Process each model combination
+            for i, model_combo in enumerate(model_combinations):
+                print(f"\n[{i+1}/{len(model_combinations)}] Processing model combination: {model_combo}")
+                model_combo_path = os.path.join(base_dir, model_combo)
+                
+                # Find all task directories within this model combination
+                tasks = [t for t in os.listdir(model_combo_path) 
+                        if os.path.isdir(os.path.join(model_combo_path, t))]
+                
+                if not tasks:
+                    print(f"No task directories found in {model_combo_path}")
+                    continue
+                
+                print(f"\nProcessing {model_combo} with tasks: {tasks}")
+                
+                # Process each task
+                for task in tasks:
+                    task_path = os.path.join(model_combo_path, task)
+                    print(f"    Processing task: {task} in {task_path}")
+                    
+                    try:
+                        # Create ExpLog for this specific task directory
+                        exp_log = ExpLog(task_path)
+                        
+                        if exp_log.__len__() == 0:
+                            print(f"    ⚠️  No experiment files found in {task_path}")
+                            continue
+                        
+                        print(f"    Found {exp_log.__len__()} experiment files")
+                        
+                        # Create order list for this task
+                        auto_order_list = []
+                        if variant["order"] == "AUTO":
+                            # Auto-detect orders from JSON files
+                            for idx in range(exp_log.__len__()):
+                                try:
+                                    detected_order = exp_log.get_secondary_order_list(idx, 0)[0]
+                                    auto_order_list.append(detected_order)
+                                except:
+                                    # If auto-detection fails, use the directory name as task
+                                    auto_order_list.append(task)
+                        else:
+                            # Use specified order for all logs
+                            for idx in range(exp_log.__len__()):
+                                auto_order_list.append(variant["order"])
+                        
+                        print(f"    Order list: {auto_order_list}")
+                        
+                        # Create evaluation and run it
+                        eval = Evaluation(order_name_list=auto_order_list, exp_log=exp_log)
+                        eval.evaluate(task_path)
+                        
+                        print(f"    ✓ Completed evaluation for {model_combo}/{task}")
+                        
+                    except Exception as e:
+                        print(f"    ✗ Error evaluating {model_combo}/{task}: {str(e)}")
+                        import traceback
+                        print(f"    Full error: {traceback.format_exc()}")
+                        continue
+            
+            print(f"\nCustom directory evaluation completed for {variant['log_dir']}")
+
         if variant["test_mode"] == "build_in":
             for model in models:
                 for order in orders:
@@ -124,7 +207,7 @@ if __name__ == "__main__":
         help="exp mode run step-by-step, demo mode run via traj",
     )
     parser.add_argument(
-        "--test_mode", type=str, default="fix_task", choices=["fix_task", "build_in"]
+        "--test_mode", type=str, default="fix_task", choices=["fix_task", "build_in", "custom_dir"]
     )
     parser.add_argument(
         "--save", type=boolean_argument, default=True, help="Whether save the result"
