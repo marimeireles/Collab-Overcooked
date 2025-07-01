@@ -187,7 +187,7 @@ class Module(object):
         key,
         proxy,
         stop=None,
-        temperature=0.7,
+        temperature=0.8,
         debug_mode="Y",
         trace=True,
         rethink=False,
