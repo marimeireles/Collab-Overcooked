@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name=qwen7b
+#SBATCH --job-name=q7b_1cup
 #SBATCH --output=slurm/%j.log
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=48GB
-#SBATCH --gres=gpu:A6000:2
-#SBATCH --time=6:00:00
-#SBATCH --nodelist=gail.ist.berkeley.edu
+#SBATCH --gres=gpu:A100-PCI-80GB:1
+#SBATCH --time=12:00:00
+#SBATCH --nodelist=cirl.ist.berkeley.edu
 
 set -euo pipefail
 set -a
@@ -75,7 +75,7 @@ CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen2.5-7B-Instruct \
        --host 0.0.0.0 \
        --port 8070 \
        --trust-remote-code \
-       --gpu-memory-utilization 0.8 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8070.log" 2>&1 &
+       --gpu-memory-utilization 0.4 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8070.log" 2>&1 &
 server1_pid=$!
 
 # Wait for first server to be ready
@@ -85,15 +85,15 @@ if ! check_server_ready "8070" "Qwen/Qwen2.5-7B-Instruct"; then
     exit 1
 fi
 
-# 8) Launch second vLLM server on port 8071 (GPU 1)
-echo "Starting second Qwen model on port 8071 (GPU 1)..."
+# 8) Launch second vLLM server on port 8071 (GPU 0 - same as first)
+echo "Starting second Qwen model on port 8071 (GPU 0)..."
 echo "Available GPUs: $(nvidia-smi -L)"
-echo "GPU 1 status: $(nvidia-smi -i 1 --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits)"
-CUDA_VISIBLE_DEVICES=1 vllm serve Qwen/Qwen2.5-7B-Instruct \
+echo "GPU 0 status: $(nvidia-smi -i 0 --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits)"
+CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen2.5-7B-Instruct \
        --host 0.0.0.0 \
        --port 8071 \
        --trust-remote-code \
-       --gpu-memory-utilization 0.8 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8071.log" 2>&1 &
+       --gpu-memory-utilization 0.4 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8071.log" 2>&1 &
 server2_pid=$!
 
 # Wait for second server to be ready
@@ -114,4 +114,5 @@ trap 'echo "Stopping servers..."; kill $server1_pid $server2_pid 2>/dev/null || 
 
 # Wait for either server to finish
 wait
+
 

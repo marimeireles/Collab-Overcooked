@@ -3,9 +3,9 @@
 #SBATCH --output=slurm/%j.log
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=48GB
-#SBATCH --gres=gpu:A6000:2
-#SBATCH --time=6:00:00
-#SBATCH --nodelist=gail.ist.berkeley.edu
+#SBATCH --gres=gpu:A100-SXM4-80GB:2
+#SBATCH --time=12:00:00
+#SBATCH --nodelist=sac.ist.berkeley.edu
 
 set -euo pipefail
 set -a
@@ -114,4 +114,5 @@ trap 'echo "Stopping servers..."; kill $server1_pid $server2_pid 2>/dev/null || 
 
 # Wait for either server to finish
 wait
+
 
