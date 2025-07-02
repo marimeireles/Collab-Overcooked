@@ -1,0 +1,148 @@
+{
+    "boiled_egg": {
+        "similarity_and_redundancy_result": {
+            "agent_0": [
+                {
+                    "max_f1": 0.07654395493864413,
+                    "corresponding_similarity": 0.2,
+                    "corresponding_redundancy": 0.045454545454545456
+                },
+                {
+                    "max_f1": 0.5131490222521914,
+                    "corresponding_similarity": 1.0,
+                    "corresponding_redundancy": 0.3333333333333333
+                }
+            ],
+            "agent_1": [
+                {
+                    "max_f1": 0.21940320023064722,
+                    "corresponding_similarity": 1.0,
+                    "corresponding_redundancy": 0.11764705882352941
+                },
+                {
+                    "max_f1": 0.24489139179404665,
+                    "corresponding_similarity": 1.0,
+                    "corresponding_redundancy": 0.13333333333333333
+                }
+            ]
+        },
+        "average": {
+            "similarity_and_redundancy": {
+                "agent_0": {
+                    "mean_f1": 0.29484648859541773,
+                    "mean_similarity": 0.6,
+                    "mean_redundancy": 0.1893939393939394,
+                    "std_f1": 0.21830253365677363,
+                    "std_similarity": 0.4,
+                    "std_redundancy": 0.14393939393939392
+                },
+                "agent_1": {
+                    "mean_f1": 0.23214729601234693,
+                    "mean_similarity": 1.0,
+                    "mean_redundancy": 0.12549019607843137,
+                    "std_f1": 0.012744095781699716,
+                    "std_similarity": 0.0,
+                    "std_redundancy": 0.00784313725490196
+                },
+                "overall": {
+                    "mean_f1": 0.7721612702541298
+                }
+            }
+        },
+        "task_metrics": {
+            "time_avg": 0.0,
+            "time_var": 0.0,
+            "steps": 120,
+            "success_rate": 0.5
+        },
+        "statistic": {
+            "initiate_collaboration": 0.0425531914893617,
+            "respond_collaboration": 0.0851063829787234
+        },
+        "confusion_matrix": [
+            [
+                [
+                    0,
+                    0
+                ],
+                [
+                    0,
+                    6
+                ]
+            ],
+            [
+                [
+                    0,
+                    0
+                ],
+                [
+                    0,
+                    13
+                ]
+            ],
+            [
+                [
+                    2,
+                    2
+                ],
+                [
+                    0,
+                    24
+                ]
+            ]
+        ],
+        "process_result": [
+            [
+                2,
+                0,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3
+            ],
+            [
+                0,
+                2,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3
+            ]
+        ]
+    }
+}

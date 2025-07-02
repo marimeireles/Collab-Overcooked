@@ -1,0 +1,169 @@
+{
+    "boiled_egg": {
+        "similarity_and_redundancy_result": {
+            "agent_0": [
+                {
+                    "max_f1": 0.18309407330178842,
+                    "corresponding_similarity": 0.6,
+                    "corresponding_redundancy": 0.10344827586206896
+                },
+                {
+                    "max_f1": 0.18309407330178842,
+                    "corresponding_similarity": 0.6,
+                    "corresponding_redundancy": 0.10344827586206896
+                }
+            ],
+            "agent_1": [
+                {
+                    "max_f1": 0.1987204595900248,
+                    "corresponding_similarity": 1.0,
+                    "corresponding_redundancy": 0.10526315789473684
+                },
+                {
+                    "max_f1": 0.14430643784962546,
+                    "corresponding_similarity": 1.0,
+                    "corresponding_redundancy": 0.07407407407407407
+                }
+            ]
+        },
+        "average": {
+            "similarity_and_redundancy": {
+                "agent_0": {
+                    "mean_f1": 0.18309407330178842,
+                    "mean_similarity": 0.6,
+                    "mean_redundancy": 0.10344827586206896,
+                    "std_f1": 0.0,
+                    "std_similarity": 0.0,
+                    "std_redundancy": 0.0
+                },
+                "agent_1": {
+                    "mean_f1": 0.17151344871982513,
+                    "mean_similarity": 1.0,
+                    "mean_redundancy": 0.08966861598440545,
+                    "std_f1": 0.027207010870199666,
+                    "std_similarity": 0.0,
+                    "std_redundancy": 0.015594541910331383
+                },
+                "overall": {
+                    "mean_f1": 0.7974948084508815
+                }
+            }
+        },
+        "task_metrics": {
+            "time_avg": 0,
+            "time_var": 0,
+            "steps": 120,
+            "success_rate": 0.0
+        },
+        "statistic": {
+            "initiate_collaboration": 0.07352941176470588,
+            "respond_collaboration": 0.1323529411764706
+        },
+        "confusion_matrix": [
+            [
+                [
+                    0,
+                    0
+                ],
+                [
+                    0,
+                    10
+                ]
+            ],
+            [
+                [
+                    1,
+                    0
+                ],
+                [
+                    0,
+                    21
+                ]
+            ],
+            [
+                [
+                    4,
+                    4
+                ],
+                [
+                    0,
+                    28
+                ]
+            ]
+        ],
+        "process_result": [
+            [
+                0,
+                0,
+                2,
+                2,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3
+            ],
+            [
+                0,
+                0,
+                2,
+                2,
+                0,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3
+            ]
+        ]
+    }
+}

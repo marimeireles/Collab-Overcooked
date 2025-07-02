@@ -1,0 +1,156 @@
+{
+    "boiled_egg": {
+        "similarity_and_redundancy_result": {
+            "agent_0": [
+                {
+                    "max_f1": 1.0,
+                    "corresponding_similarity": 1.0,
+                    "corresponding_redundancy": 1.0
+                },
+                {
+                    "max_f1": 0.22158594584101715,
+                    "corresponding_similarity": 0.6,
+                    "corresponding_redundancy": 0.13043478260869565
+                }
+            ],
+            "agent_1": [
+                {
+                    "max_f1": 0.5131490222521915,
+                    "corresponding_similarity": 1.0,
+                    "corresponding_redundancy": 0.3333333333333333
+                },
+                {
+                    "max_f1": 0.15491094147582696,
+                    "corresponding_similarity": 1.0,
+                    "corresponding_redundancy": 0.08
+                }
+            ]
+        },
+        "average": {
+            "similarity_and_redundancy": {
+                "agent_0": {
+                    "mean_f1": 0.6107929729205086,
+                    "mean_similarity": 0.8,
+                    "mean_redundancy": 0.5652173913043478,
+                    "std_f1": 0.3892070270794914,
+                    "std_similarity": 0.2,
+                    "std_redundancy": 0.43478260869565216
+                },
+                "agent_1": {
+                    "mean_f1": 0.33402998186400923,
+                    "mean_similarity": 1.0,
+                    "mean_redundancy": 0.20666666666666667,
+                    "std_f1": 0.17911904038818227,
+                    "std_similarity": 0.0,
+                    "std_redundancy": 0.12666666666666665
+                },
+                "overall": {
+                    "mean_f1": 0.7216684390362545
+                }
+            }
+        },
+        "task_metrics": {
+            "time_avg": 0.0,
+            "time_var": 0.0,
+            "steps": 21,
+            "success_rate": 0.5
+        },
+        "statistic": {
+            "initiate_collaboration": 0.32727272727272727,
+            "respond_collaboration": 0.10909090909090909
+        },
+        "confusion_matrix": [
+            [
+                [
+                    0,
+                    0
+                ],
+                [
+                    15,
+                    7
+                ]
+            ],
+            [
+                [
+                    0,
+                    0
+                ],
+                [
+                    0,
+                    13
+                ]
+            ],
+            [
+                [
+                    3,
+                    3
+                ],
+                [
+                    0,
+                    14
+                ]
+            ]
+        ],
+        "process_result": [
+            [
+                1,
+                1,
+                0,
+                2,
+                0,
+                1,
+                3,
+                3,
+                3
+            ],
+            [
+                1,
+                1,
+                1,
+                1,
+                0,
+                1,
+                3,
+                3,
+                3,
+                3,
+                1,
+                1,
+                1,
+                3,
+                1,
+                1,
+                1,
+                1,
+                3,
+                2,
+                2,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3
+            ]
+        ]
+    }
+}

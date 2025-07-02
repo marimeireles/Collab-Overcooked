@@ -1,0 +1,200 @@
+{
+    "boiled_egg": {
+        "similarity_and_redundancy_result": {
+            "agent_0": [
+                {
+                    "max_f1": 0.09352341157674818,
+                    "corresponding_similarity": 0.2,
+                    "corresponding_redundancy": 0.058823529411764705
+                },
+                {
+                    "max_f1": 0.2805702347302445,
+                    "corresponding_similarity": 0.6,
+                    "corresponding_redundancy": 0.17647058823529413
+                }
+            ],
+            "agent_1": [
+                {
+                    "max_f1": 0.31901068958289663,
+                    "corresponding_similarity": 1.0,
+                    "corresponding_redundancy": 0.18181818181818182
+                },
+                {
+                    "max_f1": 0.21940320023064722,
+                    "corresponding_similarity": 1.0,
+                    "corresponding_redundancy": 0.11764705882352941
+                }
+            ]
+        },
+        "average": {
+            "similarity_and_redundancy": {
+                "agent_0": {
+                    "mean_f1": 0.18704682315349636,
+                    "mean_similarity": 0.4,
+                    "mean_redundancy": 0.11764705882352941,
+                    "std_f1": 0.09352341157674816,
+                    "std_similarity": 0.19999999999999998,
+                    "std_redundancy": 0.05882352941176471
+                },
+                "agent_1": {
+                    "mean_f1": 0.26920694490677194,
+                    "mean_similarity": 1.0,
+                    "mean_redundancy": 0.1497326203208556,
+                    "std_f1": 0.04980374467612471,
+                    "std_similarity": 0.0,
+                    "std_redundancy": 0.03208556149732621
+                },
+                "overall": {
+                    "mean_f1": 0.6891190822703536
+                }
+            }
+        },
+        "task_metrics": {
+            "time_avg": 0,
+            "time_var": 0,
+            "steps": 120,
+            "success_rate": 0.0
+        },
+        "statistic": {
+            "initiate_collaboration": 0.06060606060606061,
+            "respond_collaboration": 0.04040404040404041
+        },
+        "confusion_matrix": [
+            [
+                [
+                    0,
+                    0
+                ],
+                [
+                    4,
+                    16
+                ]
+            ],
+            [
+                [
+                    0,
+                    0
+                ],
+                [
+                    0,
+                    24
+                ]
+            ],
+            [
+                [
+                    2,
+                    2
+                ],
+                [
+                    0,
+                    51
+                ]
+            ]
+        ],
+        "process_result": [
+            [
+                1,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3
+            ],
+            [
+                1,
+                0,
+                1,
+                2,
+                0,
+                1,
+                2,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3
+            ]
+        ]
+    }
+}
