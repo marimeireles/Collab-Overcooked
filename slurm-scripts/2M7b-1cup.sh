@@ -3,9 +3,9 @@
 #SBATCH --output=slurm/%j.log
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=48GB
-#SBATCH --gres=gpu:A100-PCI-80GB:1
-#SBATCH --time=12:00:00
-#SBATCH --nodelist=cirl.ist.berkeley.edu
+#SBATCH --gres=gpu:A100-SXM4-80GB:1
+#SBATCH --time=24:00:00
+#SBATCH --nodelist=sac.ist.berkeley.edu
 
 set -euo pipefail
 set -a
@@ -75,7 +75,8 @@ CUDA_VISIBLE_DEVICES=0 vllm serve mistralai/Mistral-7B-Instruct-v0.1 \
        --host 0.0.0.0 \
        --port 6140 \
        --trust-remote-code \
-       --gpu-memory-utilization 0.4 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_6140.log" 2>&1 &
+       --gpu-memory-utilization 0.4 \
+       --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_6140.log" 2>&1 &
 server1_pid=$!
 
 # Wait for first server to be ready
@@ -93,7 +94,8 @@ CUDA_VISIBLE_DEVICES=0 vllm serve mistralai/Mistral-7B-Instruct-v0.1 \
        --host 0.0.0.0 \
        --port 6141 \
        --trust-remote-code \
-       --gpu-memory-utilization 0.4 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_6141.log" 2>&1 &
+       --gpu-memory-utilization 0.4 \
+       --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_6141.log" 2>&1 &
 server2_pid=$!
 
 # Wait for second server to be ready

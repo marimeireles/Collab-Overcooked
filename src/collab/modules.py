@@ -28,9 +28,48 @@ from scipy.spatial.distance import cosine
 # Initialize sentence transformer model globally
 EMBEDDING_MODEL = SentenceTransformer('all-MiniLM-L6-v2')
 
-with open(openai_key_file, "r") as f:
-    context = f.read()
-openai_key = context.split("\n")[0]
+# Define context window limits for different models
+CONTEXT_WINDOW_LIMITS = {
+    "gpt-3.5-turbo": 4096,
+    "gpt-3.5-turbo-0301": 4096,
+    "gpt-3.5-turbo-16k": 16384,
+    "gpt-4": 8192,
+    "gpt-4-0314": 8192,
+    "gpt-4o": 128000,
+    "gpt-4o-2024-05-13": 128000,
+    "gpt-o1mini": 128000,
+    "text-davinci-003": 4096,
+    "deepseek-reasoner": 32768,
+    "deepseek-chat": 32768,
+    "deepseek-ai/DeepSeek-R1": 32768,
+    "deepseek-ai/DeepSeek-V3": 32768,
+    "DeepSeek-R1": 32768,
+    "claude3_sonnet": 200000,
+    # HuggingFace model identifiers (as used in vLLM)
+    "mistralai/Mistral-7B-Instruct-v0.1": 8192,
+    "Qwen/Qwen2.5-7B-Instruct": 8192,
+    "Qwen/Qwen2.5-14B-Instruct": 8192,
+    "Qwen/Qwen2.5-32B-Instruct": 26417,
+    "meta-llama/Llama-3-8B-Instruct": 8192,
+    # Simplified model names
+    "qwen2.5-7b-instruct": 8192,
+    "qwen2.5-14b-instruct": 8192,
+    "qwen2.5-32b-instruct": 26417,
+    "llama3-8b-instruct": 8192,
+    "mistral-7b-instruct-v0.1": 8192,
+    # For local models, use a conservative default
+    "default": 8192,
+}
+
+# Only load OpenAI key when needed, not at module import time
+def load_openai_key():
+    """Load OpenAI API key only when needed for OpenAI models."""
+    try:
+        with open(openai_key_file, "r") as f:
+            context = f.read()
+        return context.split("\n")[0]
+    except FileNotFoundError:
+        raise FileNotFoundError(f"OpenAI key file not found at {openai_key_file}. This is only needed for OpenAI models.")
 
 # global statistics
 statistics_dict = {
@@ -121,6 +160,7 @@ class Module(object):
         local_server_api="http://localhost:8000/v1",
         retrival_method="recent_k",
         K=3,
+        temperature=0.7,
     ):
 
         self.model = model
@@ -128,6 +168,7 @@ class Module(object):
         self.local_server_api = local_server_api
         self.retrival_method = retrival_method
         self.K = K
+        self.temperature = temperature
 
         self.chat_model = True if "gpt" in self.model else False
         self.instruction_head_list = role_messages
@@ -164,6 +205,91 @@ class Module(object):
         else:
             return None
 
+    def estimate_token_count(self, text: str) -> int:
+        """
+        Estimate token count for a given text.
+        Uses a simple heuristic: approximately 4 characters per token.
+        """
+        return len(text) // 4
+
+    def get_context_window_limit(self) -> int:
+        """
+        Get the context window limit for the current model.
+        """
+        # Normalize model name for comparison
+        model_lower = self.model.lower()
+        
+        # Check if exact model name exists
+        if self.model in CONTEXT_WINDOW_LIMITS:
+            return CONTEXT_WINDOW_LIMITS[self.model]
+        
+        # Check for partial matches (e.g., for models with version numbers)
+        for model_key in CONTEXT_WINDOW_LIMITS:
+            if model_key in self.model:
+                return CONTEXT_WINDOW_LIMITS[model_key]
+        
+        # Special detection for the user's specific models
+        if "qwen" in model_lower:
+            if any(size in model_lower for size in ["7b", "14b", "32b"]):
+                return 32768  # All Qwen2.5 models have 32K context
+        
+        if "llama" in model_lower and "8b" in model_lower:
+            return 8192  # Llama3 8B has 8K context
+        
+        if "mistral" in model_lower and "7b" in model_lower:
+            return 8192  # Mistral 7B has 8K context
+        
+        # Special handling for local models (often have paths like "/path/to/model")
+        if "/" in self.model:
+            # Most local models have similar context windows to open source models
+            if any(name in model_lower for name in ["qwen", "yi"]):
+                return 32768  # Common context window for these models
+            elif any(name in model_lower for name in ["llama", "mistral"]):
+                return 8192  # Common context window for these models
+            elif any(name in model_lower for name in ["gpt", "chat"]):
+                return 8192  # Conservative estimate for GPT-like models
+        
+        # Default for unknown models
+        print(f"⚠️  Unknown model '{self.model}', using default context window limit: {CONTEXT_WINDOW_LIMITS['default']}")
+        return CONTEXT_WINDOW_LIMITS["default"]
+
+    def truncate_conversation_content(self, content: str, max_tokens: int) -> str:
+        """
+        Truncate conversation content to fit within the context window.
+        Implements a sliding window approach that keeps the most recent content.
+        """
+        estimated_tokens = self.estimate_token_count(content)
+        
+        if estimated_tokens <= max_tokens:
+            return content
+        
+        print(f"⚠️  Content too long ({estimated_tokens} tokens), truncating to {max_tokens} tokens...")
+        
+        # Split content into lines to preserve structure
+        lines = content.split('\n')
+        
+        # Start from the second half of the content (user's preference)
+        start_idx = len(lines) // 2
+        truncated_lines = lines[start_idx:]
+        
+        # Build truncated content while staying under token limit
+        truncated_content = ""
+        for line in truncated_lines:
+            test_content = truncated_content + line + '\n'
+            if self.estimate_token_count(test_content) > max_tokens:
+                break
+            truncated_content = test_content
+        
+        # If we still don't have enough content, take the last part
+        if not truncated_content:
+            # Take the last portion that fits
+            char_limit = max_tokens * 4  # Rough estimate
+            truncated_content = content[-char_limit:]
+        
+        final_tokens = self.estimate_token_count(truncated_content)
+        print(f"✅ Content truncated from {estimated_tokens} to {final_tokens} tokens (kept ~{len(truncated_lines)}/{len(lines)} lines)")
+        return truncated_content
+
     def query_messages(self, rethink) -> list:
         sytem_message = [
             {
@@ -171,12 +297,39 @@ class Module(object):
                 "content": "You are an intelligent agent planner, you need to generate output and plan in the specified format according to the game rules and environmental status.",
             }
         ]
+        
+        # Get context window limit for this model
+        context_limit = self.get_context_window_limit()
+        
+        # Reserve space for system message and response
+        system_tokens = self.estimate_token_count(sytem_message[0]["content"])
+        instruction_tokens = self.estimate_token_count(self.instruction_head_list[0]["content"])
+        reserved_tokens = system_tokens + instruction_tokens + 500  # 500 tokens for response
+        
+        # Calculate available tokens for conversation content
+        available_tokens = context_limit - reserved_tokens
+        
+        # Get original conversation content
+        conversation_content = self.current_user_message["content"]
+        original_tokens = self.estimate_token_count(conversation_content)
+        
+        # Debug output
+        print(f"🔍 Context window info: Model={self.model}, Limit={context_limit}, Reserved={reserved_tokens}, Available={available_tokens}, Original={original_tokens}")
+        
+        # Truncate conversation content if necessary
+        if available_tokens > 0:
+            truncated_content = self.truncate_conversation_content(conversation_content, available_tokens)
+        else:
+            # If no space left, take minimal content
+            print(f"⚠️  No space left for conversation content, taking minimal content")
+            truncated_content = conversation_content[-1000:]  # Take last 1000 chars
+        
         query = sytem_message + [
             {
                 "role": "user",
                 "content": self.instruction_head_list[0]["content"]
                 + "<input>\n"
-                + self.current_user_message["content"],
+                + truncated_content,
             }
         ]
         return query
@@ -187,12 +340,16 @@ class Module(object):
         key,
         proxy,
         stop=None,
-        temperature=0.8,
+        temperature=None,
         debug_mode="Y",
         trace=True,
         rethink=False,
         map="",
     ):
+        # Use instance temperature if none provided
+        if temperature is None:
+            temperature = self.temperature
+        
         # Check if human is playing
         if "human" in self.model:
             # Human model logic
@@ -241,10 +398,9 @@ class Module(object):
         # TODO: this needs to be expanded to contain more OpenAI models
         elif any(model in self.model for model in ["gpt-3.5", "gpt-4", "text-davinci"]):
             messages = self.query_messages(rethink)
-            with open(openai_key_file, "r") as f:
-                context = f.read()
-                openai_key = context.split("\n")[0]
-            client = OpenAI(api_key=openai_key)
+            key = load_openai_key()
+            openai.api_key = key
+            client = OpenAI(api_key=key)
             if "gpt-3.5" in self.model or "gpt-4" in self.model:
                 response = client.chat.completions.create(
                     model=self.model, messages=messages, temperature=temperature
@@ -378,11 +534,9 @@ COOKING STEPs:
 """  # get embedding for current input
         # if user set up openai add a custom key, otherwise, use empty key
         key = ""
-        if self.is_openai_model(self.model):
+        if is_openai_model(self.model):
             print('🦋 model thats currently active:', self.model)
-            with open(openai_key_file, "r") as f:
-                context = f.read()
-            key = context.split("\n")[0]
+            key = load_openai_key()
             openai.api_key = key
 
         get_response = False

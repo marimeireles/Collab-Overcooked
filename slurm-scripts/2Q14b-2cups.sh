@@ -3,9 +3,9 @@
 #SBATCH --output=slurm/%j.log
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=96GB
-#SBATCH --gres=gpu:A100-PCI-80GB:2
-#SBATCH --time=12:00:00
-#SBATCH --nodelist=cirl.ist.berkeley.edu
+#SBATCH --gres=gpu:A100-SXM4-80GB:2
+#SBATCH --time=24:00:00
+#SBATCH --nodelist=sac.ist.berkeley.edu
 
 set -euo pipefail
 set -a
@@ -76,7 +76,8 @@ CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen2.5-14B-Instruct \
     --port 8140 \
     --trust-remote-code \
     --tensor-parallel-size 1 \
-    --gpu-memory-utilization 0.85 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8140.log" 2>&1 &
+    --gpu-memory-utilization 0.85 \
+    --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8140.log" 2>&1 &
 server1_pid=$!
 
 # Wait for first server to be ready
@@ -95,7 +96,8 @@ CUDA_VISIBLE_DEVICES=1 vllm serve Qwen/Qwen2.5-14B-Instruct \
     --port 8141 \
     --trust-remote-code \
     --tensor-parallel-size 1 \
-    --gpu-memory-utilization 0.85 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8141.log" 2>&1 &
+    --gpu-memory-utilization 0.85 \
+    --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8141.log" 2>&1 &
 server2_pid=$!
 
 # Wait for second server to be ready

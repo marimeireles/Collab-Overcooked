@@ -3,9 +3,9 @@
 #SBATCH --output=slurm/%j.log
 #SBATCH --cpus-per-task=32
 #SBATCH --mem=128GB
-#SBATCH --gres=gpu:A100-PCI-80GB:2
-#SBATCH --time=12:00:00
-#SBATCH --nodelist=cirl.ist.berkeley.edu
+#SBATCH --gres=gpu:A100-SXM4-80GB:2
+#SBATCH --time=24:00:00
+#SBATCH --nodelist=sac.ist.berkeley.edu
 
 set -euo pipefail
 set -a
@@ -97,7 +97,7 @@ CUDA_VISIBLE_DEVICES=0 vllm serve "$MODEL_ID" \
        --port 10000 \
        --trust-remote-code \
        --gpu-memory-utilization 0.95 \
-       --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_10000.log" 2>&1 &
+       --max-model-len 26417 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_10000.log" 2>&1 &
 server1_pid=$!
 
 # Wait for first server to be ready
@@ -115,7 +115,7 @@ CUDA_VISIBLE_DEVICES=1 vllm serve "$MODEL_ID" \
        --port 10001 \
        --trust-remote-code \
        --gpu-memory-utilization 0.95 \
-       --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_10001.log" 2>&1 &
+       --max-model-len 26417 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_10001.log" 2>&1 &
 server2_pid=$!
 
 # Wait for second server to be ready

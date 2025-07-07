@@ -75,7 +75,8 @@ CUDA_VISIBLE_DEVICES=0 vllm serve meta-llama/Meta-Llama-3-8B-Instruct \
        --host 0.0.0.0 \
        --port 4140 \
        --trust-remote-code \
-       --gpu-memory-utilization 0.8 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8140.log" 2>&1 &
+       --gpu-memory-utilization 0.8 \
+       --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8140.log" 2>&1 &
 server1_pid=$!
 
 # Wait for first server to be ready
@@ -93,7 +94,8 @@ CUDA_VISIBLE_DEVICES=1 vllm serve meta-llama/Meta-Llama-3-8B-Instruct \
        --host 0.0.0.0 \
        --port 4141 \
        --trust-remote-code \
-       --gpu-memory-utilization 0.8 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8141.log" 2>&1 &
+       --gpu-memory-utilization 0.8 \
+       --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8141.log" 2>&1 &
 server2_pid=$!
 
 # Wait for second server to be ready

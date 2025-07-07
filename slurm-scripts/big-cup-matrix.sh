@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=3x_08_big
+#SBATCH --job-name=ran2_5x_lvl1
 #SBATCH --output=slurm/%x_%j.log
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=36GB
-#SBATCH --time=12:00:00
-#SBATCH --nodelist=cirl.ist.berkeley.edu
+#SBATCH --time=22:00:00
+#SBATCH --nodelist=sac.ist.berkeley.edu
 set -euo pipefail
 
 ###############################################################################
@@ -72,37 +72,53 @@ dir_qwen_32b="/nas/ucb/marimeireles/models/qwen2.5-32b"
 # Model-combination matrix (all permutations)
 ###############################################################################
 combinations=(
-    # "14B 7B"
-    # "14B 14B"
-    # "14B 8B_LLAMA"
-    # "14B MISTRAL_7B"
-    "14B QWEN_32B"
-    # "7B 14B"
-    # "7B 7B"
-    # "7B 8B_LLAMA"
-    # "7B MISTRAL_7B"
-    "7B QWEN_32B"
-    # "8B_LLAMA 14B"
-    # "8B_LLAMA 7B"
-    # "8B_LLAMA 8B_LLAMA"
-    # "8B_LLAMA MISTRAL_7B"
-    "8B_LLAMA QWEN_32B"
-    # "MISTRAL_7B 14B"
-    # "MISTRAL_7B 7B"
-    # "MISTRAL_7B 8B_LLAMA"
-    # "MISTRAL_7B MISTRAL_7B"
-    "MISTRAL_7B QWEN_32B"
-    "QWEN_32B 14B"
-    "QWEN_32B 7B"
-    "QWEN_32B 8B_LLAMA"
-    "QWEN_32B MISTRAL_7B"
-    "QWEN_32B QWEN_32B"
+    '14B QWEN_32B'
+    'MISTRAL_7B QWEN_32B'
+    '7B 14B'
+    'MISTRAL_7B MISTRAL_7B'
+    '7B 7B'
+    'MISTRAL_7B 8B_LLAMA'
+    'QWEN_32B 14B'
+    '7B 8B_LLAMA'
+    '14B MISTRAL_7B'
+    '8B_LLAMA 14B'
+    '8B_LLAMA 7B'
+    '7B QWEN_32B'
+    'MISTRAL_7B 14B'
+    '14B 14B'
+    '8B_LLAMA 8B_LLAMA'
+    'QWEN_32B MISTRAL_7B'
+    '14B 8B_LLAMA'
+    'QWEN_32B 8B_LLAMA'
+    'MISTRAL_7B 7B'
+    '14B 7B'
+    'QWEN_32B 7B'
+    '8B_LLAMA MISTRAL_7B'
+    '7B MISTRAL_7B'
+    '8B_LLAMA QWEN_32B'
+    'QWEN_32B QWEN_32B'
 )
 
-echo "=== Running model combination matrix (5 iterations) ==="
+PROMPT_DIR="$(pwd)/prompts"
+recipe_dir="${PROMPT_DIR}/recipe"
 
-for iteration in {1..3}; do
-    echo "=== Starting iteration $iteration of 5 ==="
+mapfile -t level1_recipes < <(
+  find "${recipe_dir}" -maxdepth 1 -type f -name '1_*' \
+       -printf '%f\n' |               # basename only
+  sed -E 's/^1_//;s/\.[^.]+$//' |     # drop leading "1_" and the extension
+  sort -u
+)
+
+if (( ${#level1_recipes[@]} == 0 )); then
+  echo "ERROR: no level-1 recipes (files named 1_*) found in ${recipe_dir}" >&2
+  exit 1
+fi
+
+for iteration in {1..5}; do
+    echo "=== Starting iteration $iteration ==="
+
+  for recipe in "${level1_recipes[@]}"; do
+    echo "— Recipe: ${recipe} —"
     
     for combo in "${combinations[@]}"; do
         read -r p0_model p1_model <<< "$combo"
@@ -161,8 +177,8 @@ for iteration in {1..3}; do
         # Run the experiment (60-min timeout) .................................
         # ---------------------------------------------------------------------
         if timeout 3600 srun --nodes=1 --ntasks=1 python main.py \
-                --order boiled_egg \
-                --temperature 0.8 \
+                --order "${recipe}" \
+                --temperature 0.7 \
                 --p0_gpt_model "$p0_gpt_model" \
                 --p1_gpt_model "$p1_gpt_model" \
                 --p0_model_dirname "$p0_dir" \
@@ -187,7 +203,7 @@ for iteration in {1..3}; do
 
         echo "=== Completed experiment: ${p0_model} vs ${p1_model} ==="
     done
-    
+  done    # recipe loop
     echo "=== Completed iteration $iteration of 5 ==="
 done
 

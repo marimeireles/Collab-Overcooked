@@ -75,7 +75,8 @@ CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen2.5-7B-Instruct \
        --host 0.0.0.0 \
        --port 8070 \
        --trust-remote-code \
-       --gpu-memory-utilization 0.8 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8070.log" 2>&1 &
+       --gpu-memory-utilization 0.8 \
+       --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8070.log" 2>&1 &
 server1_pid=$!
 
 # Wait for first server to be ready
@@ -93,7 +94,8 @@ CUDA_VISIBLE_DEVICES=1 vllm serve Qwen/Qwen2.5-7B-Instruct \
        --host 0.0.0.0 \
        --port 8071 \
        --trust-remote-code \
-       --gpu-memory-utilization 0.8 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8071.log" 2>&1 &
+       --gpu-memory-utilization 0.8 \
+       --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8071.log" 2>&1 &
 server2_pid=$!
 
 # Wait for second server to be ready

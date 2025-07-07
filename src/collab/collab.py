@@ -105,6 +105,7 @@ class LLMAgents(LLMPair):
         debug_mode="N",
         agent_index=None,
         outdir=None,
+        temperature=0.7,
     ):
         super().__init__(
             model=model, model_dirname=model_dirname, local_server_api=local_server_api
@@ -124,6 +125,7 @@ class LLMAgents(LLMPair):
 
         self.retrival_method = retrival_method
         self.K = K
+        self.temperature = temperature
 
         self.prev_state = None
         self.auto_unstuck = auto_unstuck
@@ -179,6 +181,7 @@ class LLMAgents(LLMPair):
             self.local_server_api,
             retrival_method,
             K,
+            temperature=self.temperature,
         )
 
     # 	return messages
