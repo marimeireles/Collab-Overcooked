@@ -426,7 +426,8 @@ class Overcooked(gym.Env):
             # seeding does not) reach, we set the same seed internally to all
             # environments. The effect is negligible, as all other randomness
             # is controlled by the actual run seeds
-            np.random.seed(0)
+            # np.random.seed(0)
+            pass
         self.base_env = base_env
         self.mdp = base_env.mdp
         self.featurize_fn = featurize_fn
