@@ -24,7 +24,7 @@ if [ $# -eq 1 ]; then
     /usr/bin/env ${python_dir} -- organize_result.py --custom_dir "$CUSTOM_DIR"
     
     echo "3. Converting results by levels..."
-    /usr/bin/env ${python_dir} -- convert_result.py
+    /usr/bin/env ${python_dir} -- convert_result.py --custom_dir "$CUSTOM_DIR"
     
 else
     echo "No custom directory specified. Running default evaluation..."

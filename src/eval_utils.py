@@ -624,6 +624,23 @@ class Evaluation:
         self.exp_action_agent = self.exp_log.get_total_action_list
         self.log_action_encoded = self._encode_action_log()
 
+    def _extract_experiment_name(self, save_dir):
+        """Extract experiment name from directory path for consistent filename generation."""
+        path_parts = save_dir.strip('/').split('/')
+        
+        # Find the experiment directory name (starts with 'experiment')
+        experiment_name = None
+        for part in path_parts:
+            if part.startswith('experiment'):
+                experiment_name = part
+                break
+        
+        # If no experiment name found, use the last directory name
+        if experiment_name is None:
+            experiment_name = path_parts[-1] if path_parts else "default"
+        
+        return experiment_name
+
     def _get_action_space(self):
         """
         Use various combinations to get the action space for converting to integer coding
@@ -1063,7 +1080,7 @@ class Evaluation:
         successed_timestamp = self.exp_log.get_successed_timestamp
         time_finish = []
         for timestamp_log in successed_timestamp:
-            time_finish.append(len(timestamp_log[0]))
+            time_finish.append(timestamp_log[0])
         
         # Get steps from ALL experiments (successful and failed)
         all_timestamps = self.exp_log.get_total_timestamp
@@ -1284,7 +1301,13 @@ class Evaluation:
 
         result[order_name]["process_result"] = process_result
 
-        save_path = os.path.join(save_dir, "evaluation_result.json")
+        # Extract experiment name from the save_dir path for filename
+        experiment_name = self._extract_experiment_name(save_dir)
+        
+        # Create filename with experiment name
+        result_filename = f"evaluation_result_{experiment_name}.json"
+        save_path = os.path.join(save_dir, result_filename)
+        
         with open(save_path, "w") as json_file:
             json.dump(result, json_file, indent=4, ensure_ascii=False)
 
@@ -1531,7 +1554,11 @@ class Evaluation:
 
         # print(confusion_matrix)
         # print(process_result)
-        save_path = os.path.join(save_dir, "case_study_3.json")
+        
+        # Extract experiment name for case study filename consistency
+        experiment_name = self._extract_experiment_name(save_dir)
+        case_study_filename = f"case_study_3_{experiment_name}.json"
+        save_path = os.path.join(save_dir, case_study_filename)
         with open(save_path, "w") as json_file:
             json.dump(case_study_3, json_file, indent=4, ensure_ascii=False)
         return confusion_matrix, process_result

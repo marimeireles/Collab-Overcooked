@@ -84,6 +84,7 @@ def build_agent(variant, key, actor, mdp, layout, mode):
             retrival_method=variant["retrival_method"],
             K=variant["K"],
             actor=actor,
+            temperature=variant["temperature"],
         )
     else:
         return make_agent(algo, mdp, layout)
@@ -127,9 +128,9 @@ def main(variant):
         # Generate timestamp for this specific episode
         current_time = time.strftime("%Y-%m-%d_%H-%M-%S")
         # Save directory is now <statistics_save_dir>/experiment_<date>/<p0_model_safe>_<p1_model_safe>/<order>
-        save_dir = f"{variant['statistics_save_dir']}/experiment_{current_date}/{p0_model_safe}_{p1_model_safe}/{variant['order']}"
+        save_dir = f"{variant['statistics_save_dir']}/experiment_{current_date}_temp_{variant['temperature']}/{p0_model_safe}_{p1_model_safe}/{variant['order']}"
         os.makedirs(save_dir, exist_ok=True)
-        # Filename embeds model names for clarity as well
+        # Filename embeds model names and temperature for clarity as well
         filename = f"{save_dir}/experiment_{current_time}_chef_{p0_model_safe}_assistant_{p1_model_safe}_{variant['order']}.json"
 
         # Develop mode: user steps through action_list manually
@@ -389,6 +390,12 @@ if __name__ == "__main__":
         type=str,
         default="data",
         help="save directory of LLM statistics",
+    )
+    parser.add_argument(
+        "--temperature",
+        type=float,
+        default=0.7,
+        help="Temperature parameter for LLM generation (default: 0.7)",
     )
 
     args = parser.parse_args()

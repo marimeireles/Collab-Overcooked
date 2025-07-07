@@ -150,10 +150,30 @@ def process_single_evaluation(model_name, order, eval_file_path, df):
     return df
 
 
+def extract_experiment_name(custom_dir):
+    """Extract experiment name from directory path for consistent filename generation."""
+    path_parts = custom_dir.strip('/').split('/')
+    
+    # Find the experiment directory name (starts with 'experiment')
+    experiment_name = None
+    for part in path_parts:
+        if part.startswith('experiment'):
+            experiment_name = part
+            break
+    
+    # If no experiment name found, use the last directory name
+    if experiment_name is None:
+        experiment_name = path_parts[-1] if path_parts else "default"
+    
+    return experiment_name
+
+
 def process_custom_directory(custom_dir):
     """Process evaluation results from custom directory structure (3-level)"""
     
-    excel_path = os.path.join("eval_result", "statistics_data.csv")
+    # Extract experiment name for filename
+    experiment_name = extract_experiment_name(custom_dir)
+    excel_path = os.path.join("eval_result", f"statistics_data_{experiment_name}.csv")
     os.makedirs("eval_result", exist_ok=True)
     
     # Initialize or load existing dataframe
@@ -221,7 +241,14 @@ def process_custom_directory(custom_dir):
         # Process each task
         for task in tasks:
             task_path = os.path.join(model_combo_path, task)
-            eval_file = os.path.join(task_path, "evaluation_result.json")
+            
+            # Try experiment-specific filename first, then fall back to default
+            experiment_name = extract_experiment_name(custom_dir)
+            eval_file = os.path.join(task_path, f"evaluation_result_{experiment_name}.json")
+            
+            # Fallback to default filename if experiment-specific doesn't exist
+            if not os.path.exists(eval_file):
+                eval_file = os.path.join(task_path, "evaluation_result.json")
             
             # Use model_combo as the model name
             df = process_single_evaluation(model_combo, task, eval_file, df)
@@ -241,8 +268,11 @@ def main(variant):
     eval_result_dir = "eval_result" + "/" + variant["model"]
 
     order_dir = os.path.join(eval_result_dir, order)
+    
+    # For legacy mode, use default filename (no experiment name)
     eval_file = os.path.join(order_dir, "evaluation_result.json")
 
+    # Use default filename for legacy mode
     excel_path = os.path.join("eval_result", "statistics_data.csv")
 
     if os.path.exists(excel_path):
