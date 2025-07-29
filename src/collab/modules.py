@@ -208,9 +208,56 @@ class Module(object):
     def estimate_token_count(self, text: str) -> int:
         """
         Estimate token count for a given text.
-        Uses a simple heuristic: approximately 4 characters per token.
+        Uses a more accurate estimation based on model type and content analysis.
         """
-        return len(text) // 4
+        if not text:
+            return 0
+        
+        # For very short texts, use a conservative estimate
+        if len(text) < 20:
+            return max(1, len(text.split()))
+        
+        # Try to use tiktoken for more accurate estimation when available
+        try:
+            if "gpt" in self.model.lower():
+                import tiktoken
+                if "gpt-4" in self.model:
+                    encoding = tiktoken.encoding_for_model("gpt-4")
+                elif "gpt-3.5" in self.model:
+                    encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+                else:
+                    encoding = tiktoken.get_encoding("cl100k_base")
+                return len(encoding.encode(text))
+        except (ImportError, Exception):
+            pass
+        
+        # For other models, use improved heuristics
+        # Count words, punctuation, and special characters
+        words = len(text.split())
+        
+        # Special tokens and formatting add overhead
+        special_chars = text.count('\n') + text.count('\t') + text.count('  ')
+        json_like_chars = text.count('{') + text.count('}') + text.count('[') + text.count(']')
+        
+        # More conservative estimation: 3.5 characters per token for structured content
+        # 4.5 characters per token for natural language
+        if json_like_chars > 0 or special_chars > len(text) * 0.1:
+            # Structured content (JSON, code, etc.) - more tokens
+            base_tokens = len(text) // 3
+        else:
+            # Natural language - fewer tokens
+            base_tokens = len(text) // 4.5
+        
+        # Add overhead for special formatting
+        overhead = special_chars + json_like_chars
+        
+        # Conservative estimate: add 20% safety margin
+        estimated = int((base_tokens + overhead) * 1.2)
+        
+        # Ensure minimum based on word count
+        word_based_estimate = int(words * 1.3)  # Conservative word-to-token ratio
+        
+        return max(estimated, word_based_estimate)
 
     def get_context_window_limit(self) -> int:
         """
@@ -265,28 +312,44 @@ class Module(object):
         
         print(f"⚠️  Content too long ({estimated_tokens} tokens), truncating to {max_tokens} tokens...")
         
+        # Apply safety margin to account for estimation inaccuracies
+        target_tokens = int(max_tokens * 0.9)  # 10% safety margin
+        
         # Split content into lines to preserve structure
         lines = content.split('\n')
         
-        # Start from the second half of the content (user's preference)
-        start_idx = len(lines) // 2
-        truncated_lines = lines[start_idx:]
+        # Try to preserve the most recent content (end of conversation)
+        truncated_lines = []
+        current_tokens = 0
         
-        # Build truncated content while staying under token limit
-        truncated_content = ""
-        for line in truncated_lines:
-            test_content = truncated_content + line + '\n'
-            if self.estimate_token_count(test_content) > max_tokens:
+        # Start from the end and work backwards
+        for i in range(len(lines) - 1, -1, -1):
+            line = lines[i]
+            line_tokens = self.estimate_token_count(line + '\n')
+            
+            if current_tokens + line_tokens <= target_tokens:
+                truncated_lines.insert(0, line)
+                current_tokens += line_tokens
+            else:
                 break
-            truncated_content = test_content
         
-        # If we still don't have enough content, take the last part
-        if not truncated_content:
-            # Take the last portion that fits
-            char_limit = max_tokens * 4  # Rough estimate
+        # If we got some lines, use them
+        if truncated_lines:
+            truncated_content = '\n'.join(truncated_lines)
+        else:
+            # Emergency fallback: take the last portion that fits
+            char_limit = int(target_tokens * 3.5)  # Conservative char-to-token ratio
             truncated_content = content[-char_limit:]
         
+        # Final validation and adjustment
         final_tokens = self.estimate_token_count(truncated_content)
+        if final_tokens > target_tokens:
+            # If still too long, do character-based truncation
+            reduction_factor = target_tokens / final_tokens
+            new_char_limit = int(len(truncated_content) * reduction_factor)
+            truncated_content = truncated_content[-new_char_limit:]
+            final_tokens = self.estimate_token_count(truncated_content)
+        
         print(f"✅ Content truncated from {estimated_tokens} to {final_tokens} tokens (kept ~{len(truncated_lines)}/{len(lines)} lines)")
         return truncated_content
 
@@ -301,10 +364,10 @@ class Module(object):
         # Get context window limit for this model
         context_limit = self.get_context_window_limit()
         
-        # Reserve space for system message and response
+        # Reserve space for system message and response (more conservative)
         system_tokens = self.estimate_token_count(sytem_message[0]["content"])
         instruction_tokens = self.estimate_token_count(self.instruction_head_list[0]["content"])
-        reserved_tokens = system_tokens + instruction_tokens + 500  # 500 tokens for response
+        reserved_tokens = system_tokens + instruction_tokens + 1000  # 1000 tokens for response + overhead
         
         # Calculate available tokens for conversation content
         available_tokens = context_limit - reserved_tokens
@@ -322,8 +385,9 @@ class Module(object):
         else:
             # If no space left, take minimal content
             print(f"⚠️  No space left for conversation content, taking minimal content")
-            truncated_content = conversation_content[-1000:]  # Take last 1000 chars
+            truncated_content = conversation_content[-500:]  # Take last 500 chars (very conservative)
         
+        # Build the query
         query = sytem_message + [
             {
                 "role": "user",
@@ -332,6 +396,34 @@ class Module(object):
                 + truncated_content,
             }
         ]
+        
+        # Final validation: ensure the entire query is within context limits
+        total_query_tokens = sum(self.estimate_token_count(msg["content"]) for msg in query)
+        safety_margin = 200  # Extra safety margin
+        
+        if total_query_tokens > (context_limit - safety_margin):
+            print(f"⚠️  Query too long ({total_query_tokens} tokens), performing emergency truncation...")
+            
+            # Emergency truncation: reduce conversation content more aggressively
+            max_conversation_tokens = context_limit - reserved_tokens - safety_margin
+            if max_conversation_tokens < 100:
+                max_conversation_tokens = 100  # Minimum viable content
+            
+            truncated_content = self.truncate_conversation_content(conversation_content, max_conversation_tokens)
+            
+            # Rebuild query with emergency truncation
+            query = sytem_message + [
+                {
+                    "role": "user",
+                    "content": self.instruction_head_list[0]["content"]
+                    + "<input>\n"
+                    + truncated_content,
+                }
+            ]
+            
+            final_tokens = sum(self.estimate_token_count(msg["content"]) for msg in query)
+            print(f"🔧 Emergency truncation: {total_query_tokens} → {final_tokens} tokens")
+        
         return query
 
     @retry_with_exponential_backoff
