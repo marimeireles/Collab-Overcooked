@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name=q14b_2cups
+#SBATCH --job-name=Q31B
 #SBATCH --output=slurm/%j.log
 #SBATCH --cpus-per-task=16
-#SBATCH --mem=96GB
-#SBATCH --gres=gpu:A100-SXM4-80GB:2
-#SBATCH --time=48:00:00
-#SBATCH --nodelist=sac.ist.berkeley.edu
+#SBATCH --mem=48GB
+#SBATCH --gres=gpu:A100-PCI-80GB:1
+#SBATCH --time=24:00:00
+#SBATCH --nodelist=rlhf.ist.berkeley.edu
 
 set -euo pipefail
 set -a
@@ -15,11 +15,11 @@ set +a
 echo "Running on host: $(hostname)"
 
 # 1) Point to micromamba root
-export MAMBA_ROOT_PREFIX=/nas/ucb/$USER/micromamba
+export MAMBA_ROOT_PREFIX=/nas/ucb/marimeireles/micromamba
 export PATH=$MAMBA_ROOT_PREFIX/bin:$PATH
 
 # 2) Export environment variables
-export TMPDIR=/nas/ucb/$USER/pip_tmp
+export TMPDIR=/nas/ucb/marimeireles/pip_tmp
 export HUGGINGFACE_HUB_CACHE="/nas/ucb/marimeireles/cache/hub"
 export HF_HOME="/nas/ucb/marimeireles/cache/hub"
 export XDG_CONFIG_HOME="/nas/ucb/marimeireles/.config"
@@ -32,11 +32,11 @@ eval "$($MAMBA_ROOT_PREFIX/micromamba shell hook --shell bash)"
 micromamba activate $MAMBA_ROOT_PREFIX/envs/overcooked
 
 # 5) Change to project directory
-cd /nas/ucb/$USER/dev/Collab-Overcooked
+cd /nas/ucb/marimeireles/dev/Collab-Overcooked
 
 # 6) Login and download model
 huggingface-cli login --token "$HF_TOKEN"
-huggingface-cli download Qwen/Qwen2.5-14B-Instruct
+huggingface-cli download Qwen/Qwen3-0.6B
 
 # Function to check if a server is ready
 check_server_ready() {
@@ -44,9 +44,9 @@ check_server_ready() {
     local model_name=$2
     local max_attempts=30
     local attempt=1
-    
+
     echo "Waiting for server on port $port to be ready..."
-    
+
     while [ $attempt -le $max_attempts ]; do
         if curl -s -X POST "http://localhost:$port/v1/completions" \
             -H "Content-Type: application/json" \
@@ -59,58 +59,56 @@ check_server_ready() {
             echo "Server on port $port is ready!"
             return 0
         fi
-        
+
         echo "Attempt $attempt/$max_attempts: Server not ready yet, waiting 10 seconds..."
         sleep 10
         attempt=$((attempt + 1))
     done
-    
+
     echo "ERROR: Server on port $port failed to start after $max_attempts attempts"
     return 1
 }
 
-# 7) Launch first vLLM server on port 8140 (GPU 0)
-echo "Starting first Qwen model on port 8140 (GPU 0)..."
-CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen2.5-14B-Instruct \
-    --host 0.0.0.0 \
-    --port 8140 \
-    --trust-remote-code \
-    --tensor-parallel-size 1 \
-    --gpu-memory-utilization 0.85 \
-    --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8140.log" 2>&1 &
+# 7) Launch first vLLM server on port 8070 (GPU 0)
+echo "Starting first Qwen3-0.6B model on port 8070 (GPU 0)..."
+CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3-0.6B \
+       --host 0.0.0.0 \
+       --port 8070 \
+       --trust-remote-code \
+       --gpu-memory-utilization 0.4 \
+       --max-model-len 8192 > "/nas/ucb/marimeireles/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8070.log" 2>&1 &
 server1_pid=$!
 
 # Wait for first server to be ready
-if ! check_server_ready "8140" "Qwen/Qwen2.5-14B-Instruct"; then
-    echo "Failed to start server on port 8140. Exiting."
+if ! check_server_ready "8070" "Qwen/Qwen3-0.6B"; then
+    echo "Failed to start server on port 8070. Exiting."
     kill $server1_pid 2>/dev/null || true
     exit 1
 fi
 
-# 8) Launch second vLLM server on port 8141 (GPU 1)
-echo "Starting second Qwen model on port 8141 (GPU 1)..."
+# 8) Launch second vLLM server on port 8071 (GPU 0 - same as first)
+echo "Starting second Qwen3-0.6B model on port 8071 (GPU 0)..."
 echo "Available GPUs: $(nvidia-smi -L)"
-echo "GPU 1 status: $(nvidia-smi -i 1 --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits)"
-CUDA_VISIBLE_DEVICES=1 vllm serve Qwen/Qwen2.5-14B-Instruct \
-    --host 0.0.0.0 \
-    --port 8141 \
-    --trust-remote-code \
-    --tensor-parallel-size 1 \
-    --gpu-memory-utilization 0.85 \
-    --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8141.log" 2>&1 &
+echo "GPU 0 status: $(nvidia-smi -i 0 --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits)"
+CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3-0.6B \
+       --host 0.0.0.0 \
+       --port 8071 \
+       --trust-remote-code \
+       --gpu-memory-utilization 0.4 \
+       --max-model-len 8192 > "/nas/ucb/marimeireles/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8071.log" 2>&1 &
 server2_pid=$!
 
 # Wait for second server to be ready
-if ! check_server_ready "8141" "Qwen/Qwen2.5-14B-Instruct"; then
-    echo "Failed to start server on port 8141. Exiting."
+if ! check_server_ready "8071" "Qwen/Qwen3-0.6B"; then
+    echo "Failed to start server on port 8071. Exiting."
     kill $server1_pid 2>/dev/null || true
     kill $server2_pid 2>/dev/null || true
     exit 1
 fi
 
 echo "Both servers are running and ready!"
-echo "Server 1: http://localhost:8140/v1"
-echo "Server 2: http://localhost:8141/v1"
+echo "Server 1: http://localhost:8070/v1"
+echo "Server 2: http://localhost:8071/v1"
 
 # Keep the script running to maintain the servers
 echo "Servers are running. Press Ctrl+C to stop them."
@@ -118,4 +116,5 @@ trap 'echo "Stopping servers..."; kill $server1_pid $server2_pid 2>/dev/null || 
 
 # Wait for either server to finish
 wait
+
 

@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=ran2_5x_lvl1
+#SBATCH --job-name=03_08_07_lvl1
 #SBATCH --output=slurm/%x_%j.log
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=36GB
-#SBATCH --time=22:00:00
-#SBATCH --nodelist=sac.ist.berkeley.edu
+#SBATCH --time=24:00:00
+#SBATCH --nodelist=rlhf.ist.berkeley.edu
 set -euo pipefail
 
 ###############################################################################
@@ -114,98 +114,93 @@ if (( ${#level1_recipes[@]} == 0 )); then
   exit 1
 fi
 
-for iteration in {1..5}; do
-    echo "=== Starting iteration $iteration ==="
+for recipe in "${level1_recipes[@]}"; do
+  echo "— Recipe: ${recipe} —"
+  
+  for combo in "${combinations[@]}"; do
+      read -r p0_model p1_model <<< "$combo"
 
-  for recipe in "${level1_recipes[@]}"; do
-    echo "— Recipe: ${recipe} —"
-    
-    for combo in "${combinations[@]}"; do
-        read -r p0_model p1_model <<< "$combo"
+      # Select endpoint and local model directory for p0
+      if [[ $p0_model == 14B ]]; then
+          p0_server="$(model_url 14B_A)/v1"
+          p0_dir="$dir_14b"
+          p0_gpt_model="Qwen/Qwen2.5-14B-Instruct"
+      elif [[ $p0_model == 7B ]]; then
+          p0_server="$(model_url 7B_A)/v1"
+          p0_dir="$dir_7b"
+          p0_gpt_model="Qwen/Qwen2.5-7B-Instruct"
+      elif [[ $p0_model == 8B_LLAMA ]]; then
+          p0_server="$(model_url 8B_LLAMA_A)/v1"
+          p0_dir="$dir_8b_llama"
+          p0_gpt_model="meta-llama/Meta-Llama-3-8B-Instruct"
+      elif [[ $p0_model == MISTRAL_7B ]]; then
+          p0_server="$(model_url MISTRAL_7B_A)/v1"
+          p0_dir="$dir_mistral_7b"
+          p0_gpt_model="mistralai/Mistral-7B-Instruct-v0.1"
+      elif [[ $p0_model == QWEN_32B ]]; then
+          p0_server="$(model_url QWEN_32B_A)/v1"
+          p0_dir="$dir_qwen_32b"
+          p0_gpt_model="Qwen/Qwen2.5-32B-Instruct"
+      fi
 
-        # Select endpoint and local model directory for p0
-        if [[ $p0_model == 14B ]]; then
-            p0_server="$(model_url 14B_A)/v1"
-            p0_dir="$dir_14b"
-            p0_gpt_model="Qwen/Qwen2.5-14B-Instruct"
-        elif [[ $p0_model == 7B ]]; then
-            p0_server="$(model_url 7B_A)/v1"
-            p0_dir="$dir_7b"
-            p0_gpt_model="Qwen/Qwen2.5-7B-Instruct"
-        elif [[ $p0_model == 8B_LLAMA ]]; then
-            p0_server="$(model_url 8B_LLAMA_A)/v1"
-            p0_dir="$dir_8b_llama"
-            p0_gpt_model="meta-llama/Meta-Llama-3-8B-Instruct"
-        elif [[ $p0_model == MISTRAL_7B ]]; then
-            p0_server="$(model_url MISTRAL_7B_A)/v1"
-            p0_dir="$dir_mistral_7b"
-            p0_gpt_model="mistralai/Mistral-7B-Instruct-v0.1"
-        elif [[ $p0_model == QWEN_32B ]]; then
-            p0_server="$(model_url QWEN_32B_A)/v1"
-            p0_dir="$dir_qwen_32b"
-            p0_gpt_model="Qwen/Qwen2.5-32B-Instruct"
-        fi
+      # Select endpoint and local model directory for p1
+      if [[ $p1_model == 14B ]]; then
+          p1_server="$(model_url 14B_B)/v1"
+          p1_dir="$dir_14b"
+          p1_gpt_model="Qwen/Qwen2.5-14B-Instruct"
+      elif [[ $p1_model == 7B ]]; then
+          p1_server="$(model_url 7B_B)/v1"
+          p1_dir="$dir_7b"
+          p1_gpt_model="Qwen/Qwen2.5-7B-Instruct"
+      elif [[ $p1_model == 8B_LLAMA ]]; then
+          p1_server="$(model_url 8B_LLAMA_B)/v1"
+          p1_dir="$dir_8b_llama"
+          p1_gpt_model="meta-llama/Meta-Llama-3-8B-Instruct"
+      elif [[ $p1_model == MISTRAL_7B ]]; then
+          p1_server="$(model_url MISTRAL_7B_B)/v1"
+          p1_dir="$dir_mistral_7b"
+          p1_gpt_model="mistralai/Mistral-7B-Instruct-v0.1"
+      elif [[ $p1_model == QWEN_32B ]]; then
+          p1_server="$(model_url QWEN_32B_B)/v1"
+          p1_dir="$dir_qwen_32b"
+          p1_gpt_model="Qwen/Qwen2.5-32B-Instruct"
+      fi
 
-        # Select endpoint and local model directory for p1
-        if [[ $p1_model == 14B ]]; then
-            p1_server="$(model_url 14B_B)/v1"
-            p1_dir="$dir_14b"
-            p1_gpt_model="Qwen/Qwen2.5-14B-Instruct"
-        elif [[ $p1_model == 7B ]]; then
-            p1_server="$(model_url 7B_B)/v1"
-            p1_dir="$dir_7b"
-            p1_gpt_model="Qwen/Qwen2.5-7B-Instruct"
-        elif [[ $p1_model == 8B_LLAMA ]]; then
-            p1_server="$(model_url 8B_LLAMA_B)/v1"
-            p1_dir="$dir_8b_llama"
-            p1_gpt_model="meta-llama/Meta-Llama-3-8B-Instruct"
-        elif [[ $p1_model == MISTRAL_7B ]]; then
-            p1_server="$(model_url MISTRAL_7B_B)/v1"
-            p1_dir="$dir_mistral_7b"
-            p1_gpt_model="mistralai/Mistral-7B-Instruct-v0.1"
-        elif [[ $p1_model == QWEN_32B ]]; then
-            p1_server="$(model_url QWEN_32B_B)/v1"
-            p1_dir="$dir_qwen_32b"
-            p1_gpt_model="Qwen/Qwen2.5-32B-Instruct"
-        fi
+      echo "=== Starting experiment: ${p0_model} (p0) vs ${p1_model} (p1) ==="
+      echo "P0 Server: $p0_server"
+      echo "P1 Server: $p1_server"
 
-        echo "=== Starting experiment: ${p0_model} (p0) vs ${p1_model} (p1) ==="
-        echo "P0 Server: $p0_server"
-        echo "P1 Server: $p1_server"
+      # ---------------------------------------------------------------------
+      # Run the experiment (60-min timeout) .................................
+      # ---------------------------------------------------------------------
+      if timeout 3600 srun --nodes=1 --ntasks=1 python main.py \
+              --order "${recipe}" \
+              --temperature 0.7 \
+              --p0_gpt_model "$p0_gpt_model" \
+              --p1_gpt_model "$p1_gpt_model" \
+              --p0_model_dirname "$p0_dir" \
+              --p1_model_dirname "$p1_dir" \
+              --p0_local_server_api "$p0_server" \
+              --p1_local_server_api "$p1_server"; then
+          echo "Experiment ${p0_model} vs ${p1_model} completed successfully."
+      else
+          exit_code=$?
+          if [[ $exit_code == 124 ]]; then
+              echo "WARNING: Experiment ${p0_model} vs ${p1_model} timed out."
+          else
+              echo "WARNING: Experiment ${p0_model} vs ${p1_model} failed (code $exit_code)."
+          fi
+      fi
 
-        # ---------------------------------------------------------------------
-        # Run the experiment (60-min timeout) .................................
-        # ---------------------------------------------------------------------
-        if timeout 3600 srun --nodes=1 --ntasks=1 python main.py \
-                --order "${recipe}" \
-                --temperature 0.7 \
-                --p0_gpt_model "$p0_gpt_model" \
-                --p1_gpt_model "$p1_gpt_model" \
-                --p0_model_dirname "$p0_dir" \
-                --p1_model_dirname "$p1_dir" \
-                --p0_local_server_api "$p0_server" \
-                --p1_local_server_api "$p1_server"; then
-            echo "Experiment ${p0_model} vs ${p1_model} completed successfully."
-        else
-            exit_code=$?
-            if [[ $exit_code == 124 ]]; then
-                echo "WARNING: Experiment ${p0_model} vs ${p1_model} timed out."
-            else
-                echo "WARNING: Experiment ${p0_model} vs ${p1_model} failed (code $exit_code)."
-            fi
-        fi
+      # ---------------------------------------------------------------------
+      # Flush KV-cache on both engines .......................................
+      # ---------------------------------------------------------------------
+      flush_cache "${p0_server%/v1}"
+      flush_cache "${p1_server%/v1}"
 
-        # ---------------------------------------------------------------------
-        # Flush KV-cache on both engines .......................................
-        # ---------------------------------------------------------------------
-        flush_cache "${p0_server%/v1}"
-        flush_cache "${p1_server%/v1}"
-
-        echo "=== Completed experiment: ${p0_model} vs ${p1_model} ==="
-    done
-  done    # recipe loop
-    echo "=== Completed iteration $iteration of 5 ==="
-done
+      echo "=== Completed experiment: ${p0_model} vs ${p1_model} ==="
+  done
+done    # recipe loop
 
 echo "=== All experiments completed! ==="
 
