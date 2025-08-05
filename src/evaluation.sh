@@ -3,7 +3,6 @@
 # Overcooked AI Evaluation Script
 # This script provides different ways to run evaluations on your JSON experiment logs
 
-cd ~/Collab-Overcooked/src 
 python_dir=$(which python)
 
 echo "==============================================="
