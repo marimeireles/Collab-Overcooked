@@ -49,12 +49,13 @@ CONTEXT_WINDOW_LIMITS = {
     "Qwen/Qwen2.5-14B-Instruct": 8192,
     "Qwen/Qwen2.5-32B-Instruct": 26417,
     "meta-llama/Llama-3-8B-Instruct": 8192,
-    # Simplified model names
-    "qwen2.5-7b-instruct": 8192,
-    "qwen2.5-14b-instruct": 8192,
-    "qwen2.5-32b-instruct": 26417,
-    "llama3-8b-instruct": 8192,
-    "mistral-7b-instruct-v0.1": 8192,
+    # Uncertain about values below as I only found ctx window output limits for these models
+    "Qwen/Qwen3-0.6B": 8192,
+    "Qwen/Qwen3-1.7B": 8192,
+    "Qwen/Qwen3-4B": 8192,
+    "Qwen/Qwen3-8B": 8192,
+    "Qwen/Qwen3-14B": 8192,
+    "Qwen/Qwen3-32B": 26417,
     # For local models, use a conservative default
     "default": 8192,
 }
