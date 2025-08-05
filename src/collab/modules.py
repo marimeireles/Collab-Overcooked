@@ -9,7 +9,6 @@ import tiktoken
 from rich import print as rprint
 from scipy import spatial
 from transformers import AutoTokenizer
-from sentence_transformers import SentenceTransformer
 
 from .utils import convert_messages_to_prompt, retry_with_exponential_backoff, is_openai_model
 from .web_util import listen_to_server, output_to_port, username_record
@@ -20,7 +19,6 @@ openai_key_file = os.path.join(cwd, "openai_key.txt")
 
 # Always import OpenAI for API compatibility (needed for both OpenAI and local servers)
 import openai
-from openai import OpenAI
 
 from sentence_transformers import SentenceTransformer
 from scipy.spatial.distance import cosine
@@ -492,7 +490,7 @@ class Module(object):
             messages = self.query_messages(rethink)
             key = load_openai_key()
             openai.api_key = key
-            client = OpenAI(api_key=key)
+            client = openai.OpenAI(api_key=key)
             if "gpt-3.5" in self.model or "gpt-4" in self.model:
                 response = client.chat.completions.create(
                     model=self.model, messages=messages, temperature=temperature
@@ -635,7 +633,7 @@ COOKING STEPs:
         input = self.current_user_message["content"]
         while not get_response:
             try:
-                client = OpenAI(api_key=key)
+                client = openai.OpenAI(api_key=key)
                 response = client.embeddings.create(
                     model=EMBEDDING_MODEL, input=[input]
                 )
