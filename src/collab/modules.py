@@ -70,6 +70,25 @@ def load_openai_key():
     except FileNotFoundError:
         raise FileNotFoundError(f"OpenAI key file not found at {openai_key_file}. This is only needed for OpenAI models.")
 
+def load_openrouter_key():
+    """Load OpenRouter API key only when needed for OpenRouter models."""
+    try:
+        openrouter_key_file = os.path.join(os.getcwd(), "openrouter_key.txt")
+        with open(openrouter_key_file, "r") as f:
+            context = f.read()
+        return context.strip()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"OpenRouter key file not found at {openrouter_key_file}. This is only needed for OpenRouter models.")
+
+def is_openrouter_model(model):
+    """Check if the model is from OpenRouter (uses / notation like qwen/qwen3-32b)."""
+    # OpenRouter models typically use provider/model format and include common providers
+    openrouter_providers = ["qwen", "anthropic", "openai", "meta-llama", "mistralai", "google"]
+    if "/" in model:
+        provider = model.split("/")[0]
+        return provider in openrouter_providers
+    return False
+
 # global statistics
 statistics_dict = {
     "total_timestamp": [],
@@ -467,12 +486,33 @@ class Module(object):
             encoder_name = "llama3"  # Use llama3 tokenizer for human models
 
         # If not human mode, then LLM mode
-        elif "/" in self.model:  # This indicates a local model path
+        elif is_openrouter_model(self.model):  # OpenRouter models (e.g., qwen/qwen3-32b)
+            # Prepare messages for the model
+            messages = self.query_messages(rethink)
+            
+            # Load OpenRouter API key
+            openrouter_key = load_openrouter_key()
+            
+            # Initialize OpenAI client with OpenRouter endpoint
+            client = openai.OpenAI(
+                api_key=openrouter_key,
+                base_url=self.local_server_api,  # Should be https://openrouter.ai/api/v1
+            )
+
+            # Make the request to OpenRouter API
+            response = client.chat.completions.create(
+                model=self.model,  # Use the model name directly (e.g., qwen/qwen3-32b)
+                messages=messages,
+                temperature=temperature,
+            )
+            encoder_name = "llama3"  # Use llama3 tokenizer for most OpenRouter models
+
+        elif "/" in self.model:  # This indicates a local model path  
             # Prepare messages for the model
             messages = self.query_messages(rethink)
 
             # Initialize vLLM client (using OpenAI-compatible API format)
-            client = OpenAI(
+            client = openai.OpenAI(
                 api_key="not-needed",  # vLLM implements OpenAI API format
                 base_url=self.local_server_api,
             )
