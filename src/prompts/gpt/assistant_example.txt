@@ -1,4 +1,5 @@
 <example>
+<Never use thinking mode>
 Your successful action history in the past steps are: []
 Order:Onion_soup(No recipe)
 Scene 111: <Chef> holds nothing. Current action for <Chef> is [check_recipe()]. <Assistant> holds nothing. Current action for <Assistant> is []. Kitchen states: <pot0> is empty; <pot1> is empty; <chopping_board0> is empty; <chopping_board1> is empty; <oven0> is empty; 3 counters can be visited by <Chef>. Their states are as follows: counters have nothing.

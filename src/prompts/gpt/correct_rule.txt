@@ -1,4 +1,5 @@
 Input:
+<Never use thinking mode>
 - For each step, you will receive input like the following:
   - 1. Your successful action history in the past steps is: XXX  
     - A dictionary of all actions you've successfully performed in recent time steps. Use this information to infer your past plans and continue forward.
@@ -21,6 +22,7 @@ Input:
     - Each line of conversation history follows this structure: sender of the message + "says" + "turn number". Messages with the same turn number are grouped together.  
     - Read the conversation history from top to bottom, with the most recent messages at the bottom.  
 Output:
+<Never use thinking mode>
 
 You must provide output in three fields, formatted as follows:
     {role} analysis: xxxxx

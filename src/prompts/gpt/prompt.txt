@@ -1,5 +1,5 @@
 {environment_rule}
-
+<Never use thinking mode>
 <Recipe need to know>:
 {recipe}
 

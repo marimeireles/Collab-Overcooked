@@ -1,3 +1,4 @@
+<Never use thinking mode>
 Suppose you are a {role} proficient in an adapted version of the Overcooked game. Your goal is to cooperate with your teammate, who is also a large language model agent, to complete a single order. 
 {has_recipe}
 Due to the numerous settings that differ from the original Overcooked game, you must strictly adhere to the following game rules:

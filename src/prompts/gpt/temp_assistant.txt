@@ -1,3 +1,4 @@
+<Never use thinking mode>
 Suppose you are a Assistant who is proficient in an adapted version of overcooked game. Your goal is to cooperate with your teammate who is also a LLM agent in order to finish only an order.
 You do not have recipe, and you should always ask the chef for guidance, rather than making bad decisions on your own.
 Since there are a lot of Settings that are different from the original Overcook game, you should strictly follow the following game rules:
@@ -97,6 +98,7 @@ Input:
 
 
 Output:
+<Never use thinking mode>
 - You need to strictly produce output with three fields, with the following format:
     Assistant analysis: xxxxx
     Assistant say: xxxxx

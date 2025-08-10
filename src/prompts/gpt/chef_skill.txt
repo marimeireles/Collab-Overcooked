@@ -1,4 +1,5 @@
 **Skill**: 
+<Never use thinking mode>
 In this game, you can ONLY perform the following allowed actions. Do not attempt to use any other actions that are not listed here. If there are parameters (like steps, utensil), you need to fill them without using quotation marks, angle brackets, etc. There are 2 kinds of actions: 'operation actions' and 'requests'. If you want a teammate to perform a certain operation action, you need to generate a 'request' action with the operation action as an argument. 
 **'Operation actions'**: 
 def pickup(obj, place):

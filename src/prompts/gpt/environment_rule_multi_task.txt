@@ -1,4 +1,5 @@
 {character}
+<Never use thinking mode>
 Your "role" is {role}
 Game rules:
 - The Overcooked_AI game requires two players(chef and assistant) in seperate environment to work together with the goal of achieving the highest possible score.

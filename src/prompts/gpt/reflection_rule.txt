@@ -1,4 +1,5 @@
 Input:
+<Never use thinking mode>
 For each step, you will receive input in the following format:
 - 1. Successful Action History: XXX 
   A dictionary of all actions successfully performed in the last few steps. Use this to infer previous plans and guide future decisions.
@@ -24,6 +25,7 @@ For each step, you will receive input in the following format:
 - 7. Solution: Your action XXX successfully solved the problem.
 
 Output:
+<Never use thinking mode>
 Produce one field in the following format:
   Rethink: XXXXX
 - Analyze the "Failed Reason" and "Solution" fields. Summarize the experience in a concise paragraph (no more than 50 words) to help you avoid similar mistakes. Format it as:  
