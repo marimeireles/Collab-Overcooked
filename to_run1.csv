@@ -1,0 +1,4 @@
+model_pair,recipe,runs_needed
+Qwen_Qwen3-0.6B_Qwen_Qwen3-32B,1_boiled_sweet_potato,10
+Qwen_Qwen3-0.6B_Qwen_Qwen3-32B,3_baked_bell_pepper_soup,8
+Qwen_Qwen3-0.6B_Qwen_Qwen3-32B,3_baked_carrot_soup,10

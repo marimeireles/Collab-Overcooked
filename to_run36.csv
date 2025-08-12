@@ -1,0 +1,7 @@
+to_run36.csv
+model_pair,recipe,runs_needed
+Qwen_Qwen3-0.6B_Qwen_Qwen3-0.6B,5_mashed_sweet_potato_and_bean_patty,10
+Qwen_Qwen3-0.6B_Qwen_Qwen3-14B,1_baked_bell_pepper,6
+Qwen_Qwen3-0.6B_Qwen_Qwen3-14B,1_baked_sweet_potato,7
+Qwen_Qwen3-0.6B_Qwen_Qwen3-14B,1_boiled_egg,9
+Qwen_Qwen3-0.6B_Qwen_Qwen3-14B,1_boiled_mushroom,10

@@ -1,0 +1,4 @@
+model_pair,recipe,runs_needed
+Qwen_Qwen3-32B_Qwen_Qwen3-4B,1_baked_sweet_potato,8
+Qwen_Qwen3-32B_Qwen_Qwen3-4B,1_boiled_egg,10
+Qwen_Qwen3-32B_Qwen_Qwen3-4B,1_boiled_mushroom,10

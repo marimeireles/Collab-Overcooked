@@ -1,0 +1,7 @@
+model_pair,recipe,runs_needed
+Qwen_Qwen3-8B_Qwen_Qwen3-1.7B,3_baked_potato_soup,10
+Qwen_Qwen3-8B_Qwen_Qwen3-1.7B,3_baked_pumpkin_soup,10
+Qwen_Qwen3-8B_Qwen_Qwen3-1.7B,5_mashed_broccoli_and_bean_patty,6
+Qwen_Qwen3-8B_Qwen_Qwen3-1.7B,5_mashed_carrot_and_chickpea_patty,6
+Qwen_Qwen3-8B_Qwen_Qwen3-1.7B,5_mashed_cauliflower_and_lentil_patty,10
+Qwen_Qwen3-8B_Qwen_Qwen3-1.7B,5_mashed_potato_and_pea_patty,10

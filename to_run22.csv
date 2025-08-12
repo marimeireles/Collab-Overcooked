@@ -1,0 +1,6 @@
+model_pair,recipe,runs_needed
+Qwen_Qwen3-4B_Qwen_Qwen3-1.7B,3_baked_bell_pepper_soup,7
+Qwen_Qwen3-4B_Qwen_Qwen3-1.7B,3_baked_carrot_soup,7
+Qwen_Qwen3-4B_Qwen_Qwen3-1.7B,3_baked_mushroom_soup,9
+Qwen_Qwen3-4B_Qwen_Qwen3-1.7B,3_baked_potato_soup,10
+Qwen_Qwen3-4B_Qwen_Qwen3-1.7B,3_baked_pumpkin_soup,10

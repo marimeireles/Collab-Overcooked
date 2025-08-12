@@ -1,0 +1,5 @@
+model_pair,recipe,runs_needed
+Qwen_Qwen3-0.6B_Qwen_Qwen3-32B,3_baked_mushroom_soup,10
+Qwen_Qwen3-0.6B_Qwen_Qwen3-32B,3_baked_potato_soup,10
+Qwen_Qwen3-0.6B_Qwen_Qwen3-32B,3_baked_pumpkin_soup,10
+Qwen_Qwen3-0.6B_Qwen_Qwen3-32B,5_mashed_broccoli_and_bean_patty,7
