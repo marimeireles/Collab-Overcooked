@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=48GB
 #SBATCH --time=12:00:00
-#SBATCH --nodelist=sac.ist.berkeley.edu
+#SBATCH --nodelist=airl.ist.berkeley.edu
 set -euo pipefail
 
 ###############################################################################

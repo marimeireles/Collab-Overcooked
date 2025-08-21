@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=Q3-32B-1
 #SBATCH --output=slurm/%j.log
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=16
 #SBATCH --mem=128GB
-#SBATCH --gres=gpu:A100-SXM4-80GB:2
+#SBATCH --gres=gpu:A100-SXM4-80GB:1
 #SBATCH --time=48:00:00
-#SBATCH --nodelist=sac.ist.berkeley.edu
+#SBATCH --nodelist=airl.ist.berkeley.edu
 
 set -euo pipefail
 set -a
@@ -87,53 +87,34 @@ else
     echo "[+] Using cached model in $MODEL_DIR"
 fi
 
-# ======= Launch vLLM servers =======
+# ======= Launch vLLM server =======
 echo "Available GPUs: $(nvidia-smi -L)"
 
-# Launch first vLLM server on port 8320 (GPU 0)
-echo "Starting first Qwen 32B model on port 8320 (GPU 0)..."
+# Launch first vLLM server on port 4320 (GPU 0)
+echo "Starting first Qwen 32B model on port 4320 (GPU 0)..."
 CUDA_VISIBLE_DEVICES=0 vllm serve "$MODEL_ID" \
        --host 0.0.0.0 \
-       --port 8320 \
+       --port 4320 \
        --trust-remote-code \
        --gpu-memory-utilization 0.90 \
-       --max-model-len 26417 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8320.log" 2>&1 &
+       --max-model-len 26417 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_4320.log" 2>&1 &
 server1_pid=$!
 
 # Wait for first server to be ready
-if ! check_server_ready "8320" "$MODEL_ID"; then
-    echo "Failed to start server on port 8320. Exiting."
+if ! check_server_ready "4320" "$MODEL_ID"; then
+    echo "Failed to start server on port 4320. Exiting."
     kill $server1_pid 2>/dev/null || true
     exit 1
 fi
 
-# Launch second vLLM server on port 8321 (GPU 1)
-echo "Starting second Qwen 32B model on port 8321 (GPU 1)..."
-echo "GPU 1 status: $(nvidia-smi -i 1 --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits)"
-CUDA_VISIBLE_DEVICES=1 vllm serve "$MODEL_ID" \
-       --host 0.0.0.0 \
-       --port 8321 \
-       --trust-remote-code \
-       --gpu-memory-utilization 0.90 \
-       --max-model-len 26417 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8321.log" 2>&1 &
-server2_pid=$!
 
-# Wait for second server to be ready
-if ! check_server_ready "8321" "$MODEL_ID"; then
-    echo "Failed to start server on port 8321. Exiting."
-    kill $server1_pid 2>/dev/null || true
-    kill $server2_pid 2>/dev/null || true
-    exit 1
-fi
-
-echo "Both servers are running and ready!"
-echo "Server 1: http://localhost:8320/v1"
-echo "Server 2: http://localhost:8321/v1"
+echo "Server is running and ready!"
+echo "Server: http://localhost:4320/v1"
 echo "Model: $MODEL_ID"
 
-# Keep the script running to maintain the servers
-echo "Servers are running. Press Ctrl+C to stop them."
-trap 'echo "Stopping servers..."; kill $server1_pid $server2_pid 2>/dev/null || true; exit 0' INT TERM
+# Keep the script running to maintain the server
+echo "Server is running. Press Ctrl+C to stop it."
+trap 'echo "Stopping server..."; kill $server1_pid 2>/dev/null || true; exit 0' INT TERM
 
-# Wait for either server to finish
+# Wait for server to finish
 wait

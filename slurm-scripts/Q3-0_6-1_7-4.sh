@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name=Q3-06-17-4
+#SBATCH --job-name=Q3-SMALL-3-MODELS
 #SBATCH --output=slurm/%j.log
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=48GB
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=64GB
 #SBATCH --gres=gpu:A100-SXM4-80GB:1
 #SBATCH --time=48:00:00
-#SBATCH --nodelist=sac.ist.berkeley.edu
+#SBATCH --nodelist=airl.ist.berkeley.edu
 
 set -euo pipefail
 set -a
@@ -34,10 +34,12 @@ micromamba activate $MAMBA_ROOT_PREFIX/envs/overcooked
 # 5) Change to project directory
 cd /nas/ucb/marimeireles/dev/Collab-Overcooked
 
-# 6) Login and download models
+# 6) Login and download all models
 huggingface-cli login --token "$HF_TOKEN"
-huggingface-cli download Qwen/Qwen3-0.6B
-huggingface-cli download Qwen/Qwen3-1.7B
+# huggingface-cli download Qwen/Qwen3-0.6B
+# huggingface-cli download Qwen/Qwen3-1.7B
+# huggingface-cli download Qwen/Qwen3-4B
+
 
 # Function to check if a server is ready
 check_server_ready() {
@@ -70,93 +72,74 @@ check_server_ready() {
     return 1
 }
 
-# 7) Launch first Qwen3-0.6B server on port 8006 (GPU 0)
-echo "Starting first Qwen3-0.6B model on port 8006 (GPU 0)..."
+echo "Available GPUs: $(nvidia-smi -L)"
+echo "GPU 0 initial status: $(nvidia-smi -i 0 --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits)"
+
+# 7) Launch Qwen3-0.6B server on port 4006 (GPU 0)
+echo "Starting Qwen3-0.6B model on port 4006 (GPU 0)..."
 CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3-0.6B \
        --host 0.0.0.0 \
-       --port 8006 \
+       --port 4006 \
        --trust-remote-code \
-       --gpu-memory-utilization 0.2 \
-       --max-model-len 8192 > "/nas/ucb/marimeireles/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8006.log" 2>&1 &
+       --gpu-memory-utilization 0.30 \
+       --max-model-len 8192 > "/nas/ucb/marimeireles/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_4006.log" 2>&1 &
 server1_pid=$!
 
 # Wait for first server to be ready
-if ! check_server_ready "8006" "Qwen/Qwen3-0.6B"; then
-    echo "Failed to start server on port 8006. Exiting."
+if ! check_server_ready "4006" "Qwen/Qwen3-0.6B"; then
+    echo "Failed to start server on port 4006. Exiting."
     kill $server1_pid 2>/dev/null || true
     exit 1
 fi
 
-# 8) Launch second Qwen3-0.6B server on port 8061 (GPU 0)
-echo "Starting second Qwen3-0.6B model on port 8061 (GPU 0)..."
-echo "Available GPUs: $(nvidia-smi -L)"
+# 8) Launch Qwen3-1.7B server on port 4017 (GPU 0)
+echo "Starting Qwen3-1.7B model on port 4017 (GPU 0)..."
 echo "GPU 0 status: $(nvidia-smi -i 0 --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits)"
-CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3-0.6B \
+CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3-1.7B \
        --host 0.0.0.0 \
-       --port 8061 \
+       --port 4017 \
        --trust-remote-code \
-       --gpu-memory-utilization 0.2 \
-       --max-model-len 8192 > "/nas/ucb/marimeireles/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8061.log" 2>&1 &
+       --gpu-memory-utilization 0.30 \
+       --max-model-len 8192 > "/nas/ucb/marimeireles/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_4017.log" 2>&1 &
 server2_pid=$!
 
 # Wait for second server to be ready
-if ! check_server_ready "8061" "Qwen/Qwen3-0.6B"; then
-    echo "Failed to start server on port 8061. Exiting."
+if ! check_server_ready "4017" "Qwen/Qwen3-1.7B"; then
+    echo "Failed to start server on port 4017. Exiting."
     kill $server1_pid 2>/dev/null || true
     kill $server2_pid 2>/dev/null || true
     exit 1
 fi
 
-# 9) Launch first Qwen3-1.7B server on port 8170 (GPU 0)
-echo "Starting first Qwen3-1.7B model on port 8170 (GPU 0)..."
+# 9) Launch Qwen3-4B server on port 4041 (GPU 0)
+echo "Starting Qwen3-4B model on port 4041 (GPU 0)..."
 echo "GPU 0 status: $(nvidia-smi -i 0 --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits)"
-CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3-1.7B \
+CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3-4B \
        --host 0.0.0.0 \
-       --port 8170 \
+       --port 4041 \
        --trust-remote-code \
-       --gpu-memory-utilization 0.2 \
-       --max-model-len 8192 > "/nas/ucb/marimeireles/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8170.log" 2>&1 &
+       --gpu-memory-utilization 0.30 \
+       --max-model-len 8192 > "/nas/ucb/marimeireles/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_4041.log" 2>&1 &
 server3_pid=$!
 
 # Wait for third server to be ready
-if ! check_server_ready "8170" "Qwen/Qwen3-1.7B"; then
-    echo "Failed to start server on port 8170. Exiting."
+if ! check_server_ready "4041" "Qwen/Qwen3-4B"; then
+    echo "Failed to start server on port 4041. Exiting."
     kill $server1_pid 2>/dev/null || true
     kill $server2_pid 2>/dev/null || true
     kill $server3_pid 2>/dev/null || true
     exit 1
 fi
 
-# 10) Launch second Qwen3-1.7B server on port 8171 (GPU 0)
-echo "Starting second Qwen3-1.7B model on port 8171 (GPU 0)..."
-echo "GPU 0 status: $(nvidia-smi -i 0 --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits)"
-CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3-1.7B \
-       --host 0.0.0.0 \
-       --port 8171 \
-       --trust-remote-code \
-       --gpu-memory-utilization 0.2 \
-       --max-model-len 8192 > "/nas/ucb/marimeireles/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8171.log" 2>&1 &
-server4_pid=$!
-
-# Wait for fourth server to be ready
-if ! check_server_ready "8171" "Qwen/Qwen3-1.7B"; then
-    echo "Failed to start server on port 8171. Exiting."
-    kill $server1_pid 2>/dev/null || true
-    kill $server2_pid 2>/dev/null || true
-    kill $server3_pid 2>/dev/null || true
-    kill $server4_pid 2>/dev/null || true
-    exit 1
-fi
-
-echo "All four servers are running and ready!"
-echo "Qwen3-0.6B Server 1: http://localhost:8006/v1"
-echo "Qwen3-0.6B Server 2: http://localhost:8061/v1"
-echo "Qwen3-1.7B Server 1: http://localhost:8170/v1"
-echo "Qwen3-1.7B Server 2: http://localhost:8171/v1"
+echo "All three servers are running and ready!"
+echo "Qwen3-0.6B Server: http://localhost:4006/v1"
+echo "Qwen3-1.7B Server: http://localhost:4017/v1"
+echo "Qwen3-4B Server: http://localhost:4041/v1"
+echo "Final GPU 0 status: $(nvidia-smi -i 0 --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits)"
 
 # Keep the script running to maintain the servers
 echo "All servers are running. Press Ctrl+C to stop them."
-trap 'echo "Stopping servers..."; kill $server1_pid $server2_pid $server3_pid $server4_pid 2>/dev/null || true; exit 0' INT TERM
+trap 'echo "Stopping servers..."; kill $server1_pid $server2_pid $server3_pid 2>/dev/null || true; exit 0' INT TERM
 
 # Wait for any server to finish
 wait 

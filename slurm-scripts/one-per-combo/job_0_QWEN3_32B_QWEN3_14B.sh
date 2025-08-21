@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=Q3-lvl2-5x
-#SBATCH --output=slurm/%j.log
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=36GB
+#SBATCH --job-name=Q3-combo
+#SBATCH --output=slurm/%j_combo.log
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=4GB
 #SBATCH --time=48:00:00
-#SBATCH --nodelist=sac.ist.berkeley.edu
+#SBATCH --nodelist=airl.ist.berkeley.edu
 set -euo pipefail
 
 ###############################################################################
@@ -72,103 +72,30 @@ dir_qwen3_1_7b="/nas/ucb/marimeireles/cache/hub/models--Qwen--Qwen3-1.7B"
 dir_qwen3_4b="/nas/ucb/marimeireles/cache/hub/models--Qwen--Qwen3-4B"
 
 ###############################################################################
-# Model-combination matrix (all permutations)
+# Single combination for this job
 ###############################################################################
-combinations=(
-    'QWEN3_32B QWEN3_14B'
-    'QWEN3_8B QWEN3_32B'
-    'QWEN3_0_6B QWEN3_0_6B'
-    'QWEN3_8B QWEN3_8B'
-    'QWEN3_1_7B QWEN3_4B'
-    'QWEN3_32B QWEN3_8B'
-    'QWEN3_14B QWEN3_1_7B'
-    'QWEN3_4B QWEN3_14B'
-    'QWEN3_1_7B QWEN3_8B'
-    'QWEN3_14B QWEN3_4B'
-    'QWEN3_14B QWEN3_14B'
-    'QWEN3_4B QWEN3_4B'
-    'QWEN3_32B QWEN3_1_7B'
-    'QWEN3_14B QWEN3_8B'
-    'QWEN3_32B QWEN3_4B'
-    'QWEN3_1_7B QWEN3_1_7B'
-    'QWEN3_4B QWEN3_1_7B'
-    'QWEN3_8B QWEN3_1_7B'
-    'QWEN3_32B QWEN3_32B'
-    'QWEN3_0_6B QWEN3_8B'
-    'QWEN3_0_6B QWEN3_14B'
-    'QWEN3_0_6B QWEN3_32B'
-    'QWEN3_0_6B QWEN3_1_7B'
-    'QWEN3_0_6B QWEN3_4B'
-    'QWEN3_1_7B QWEN3_32B'
-    'QWEN3_1_7B QWEN3_14B'
-    'QWEN3_4B QWEN3_32B'
-    'QWEN3_4B QWEN3_8B'
-    'QWEN3_8B QWEN3_14B'
-    'QWEN3_8B QWEN3_4B'
-    'QWEN3_14B QWEN3_32B'
-    'QWEN3_14B QWEN3_0_6B'
-    'QWEN3_32B QWEN3_0_6B'
-)
-
-###############################################################################
-# Randomize combinations once (optionally reproducible with $COMBO_SEED)
-###############################################################################
-randomize_combinations() {
-  # Produces: RANDOMIZED_COMBINATIONS (global array)
-  if command -v shuf >/dev/null 2>&1; then
-    if [[ -n "${COMBO_SEED:-}" ]] && command -v openssl >/dev/null 2>&1; then
-      # Deterministic bytes source for shuf using the seed
-      mapfile -t RANDOMIZED_COMBINATIONS < <(
-        printf '%s\n' "${combinations[@]}" \
-        | shuf --random-source=<(openssl enc -aes-256-ctr -pass pass:"$COMBO_SEED" -nosalt </dev/zero 2>/dev/null)
-      )
-    elif [[ -n "${COMBO_SEED:-}" ]]; then
-      # Deterministic fallback using awk + sort (no openssl)
-      mapfile -t RANDOMIZED_COMBINATIONS < <(
-        printf '%s\n' "${combinations[@]}" \
-        | awk -v seed="$COMBO_SEED" 'BEGIN{srand(seed)}{printf "%0.9f\t%s\n", rand(), $0}' \
-        | sort -n | cut -f2-
-      )
-    else
-      # Non‑deterministic shuffle
-      mapfile -t RANDOMIZED_COMBINATIONS < <(printf '%s\n' "${combinations[@]}" | shuf)
-    fi
-  else
-    # Pure Bash Fisher–Yates shuffle
-    RANDOMIZED_COMBINATIONS=("${combinations[@]}")
-    local n=${#RANDOMIZED_COMBINATIONS[@]}
-    for ((i=n-1; i>0; i--)); do
-      j=$((RANDOM % (i+1)))
-      tmp=${RANDOMIZED_COMBINATIONS[i]}
-      RANDOMIZED_COMBINATIONS[i]=${RANDOMIZED_COMBINATIONS[j]}
-      RANDOMIZED_COMBINATIONS[j]=$tmp
-    done
-  fi
-}
-
-randomize_combinations
+combo='QWEN3_32B QWEN3_14B'
 
 PROMPT_DIR="$(pwd)/prompts"
 recipe_dir="${PROMPT_DIR}/recipe"
 
-mapfile -t level2_recipes < <(
-  find "${recipe_dir}" -maxdepth 1 -type f -name '2_*' \
+mapfile -t level1_recipes < <(
+  find "${recipe_dir}" -maxdepth 1 -type f -name '1_*' \
        -printf '%f\n' |               # basename only
-  sed -E 's/^2_//;s/\.[^.]+$//' |     # drop leading "2_" and the extension
+  sed -E 's/^1_//;s/\.[^.]+$//' |     # drop leading "1_" and the extension
   sort -u
 )
 
-if (( ${#level2_recipes[@]} == 0 )); then
-  echo "ERROR: no level-2 recipes (files named 2_*) found in ${recipe_dir}" >&2
+if (( ${#level1_recipes[@]} == 0 )); then
+  echo "ERROR: no level-1 recipes (files named 1_*) found in ${recipe_dir}" >&2
   exit 1
 fi
 
-# run the experiment 5 times
-for i in {1..5}; do
-    for recipe in "${level2_recipes[@]}"; do
+# run the experiment 2 times
+for i in {1..2}; do
+    for recipe in "${level1_recipes[@]}"; do
     echo "— Recipe: ${recipe} —"
     
-    for combo in "${RANDOMIZED_COMBINATIONS[@]}"; do
     read -r p0_model p1_model <<< "$combo"
 
         # Select endpoint and local model directory for p0
@@ -184,7 +111,6 @@ for i in {1..5}; do
             p0_server="$(model_url QWEN3_8B_A)/v1"
             p0_dir="$dir_qwen3_8b"
             p0_gpt_model="Qwen/Qwen3-8B"
-            p0_gpt_model="Qwen/Qwen3-1B"
         elif [[ $p0_model == QWEN3_0_6B ]]; then
             p0_server="$(model_url QWEN3_0_6B_A)/v1"
             p0_dir="$dir_qwen3_0_6b"
@@ -212,7 +138,6 @@ for i in {1..5}; do
             p1_server="$(model_url QWEN3_8B_B)/v1"
             p1_dir="$dir_qwen3_8b"
             p1_gpt_model="Qwen/Qwen3-8B"
-            p1_gpt_model="Qwen/Qwen3-1B"
         elif [[ $p1_model == QWEN3_0_6B ]]; then
             p1_server="$(model_url QWEN3_0_6B_B)/v1"
             p1_dir="$dir_qwen3_0_6b"
@@ -260,7 +185,6 @@ for i in {1..5}; do
         flush_cache "${p1_server%/v1}"
 
         echo "=== Completed experiment: ${p0_model} vs ${p1_model} ==="
-    done
     done    # recipe loop
 done
 

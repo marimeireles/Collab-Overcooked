@@ -5,7 +5,7 @@
 #SBATCH --mem=48GB
 #SBATCH --gres=gpu:A100-SXM4-80GB:1
 #SBATCH --time=24:00:00
-#SBATCH --nodelist=sac.ist.berkeley.edu
+#SBATCH --nodelist=airl.ist.berkeley.edu
 
 set -euo pipefail
 set -a
@@ -34,9 +34,15 @@ micromamba activate $MAMBA_ROOT_PREFIX/envs/overcooked
 # 5) Change to project directory
 cd /nas/ucb/marimeireles/dev/Collab-Overcooked
 
-# 6) Login and download model
-huggingface-cli login --token "$HF_TOKEN"
-huggingface-cli download Qwen/Qwen3-1.7B
+# 6) Check if model is already downloaded, if not then login and download
+MODEL_PATH="/nas/ucb/marimeireles/cache/hub/models--Qwen--Qwen3-1.7B/snapshots/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e"
+if [ ! -d "$MODEL_PATH" ]; then
+    echo "Model not found locally, downloading..."
+    huggingface-cli login --token "$HF_TOKEN"
+    huggingface-cli download Qwen/Qwen3-1.7B
+else
+    echo "Model already downloaded at $MODEL_PATH"
+fi
 
 # Function to check if a server is ready
 check_server_ready() {
@@ -71,7 +77,7 @@ check_server_ready() {
 
 # 7) Launch first vLLM server on port 8170 (GPU 0)
 echo "Starting first Qwen3-1.7B model on port 8170 (GPU 0)..."
-CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3-1.7B \
+CUDA_VISIBLE_DEVICES=0 vllm serve /nas/ucb/marimeireles/cache/hub/models--Qwen--Qwen3-1.7B/snapshots/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e \
        --host 0.0.0.0 \
        --port 8170 \
        --trust-remote-code \
@@ -90,7 +96,7 @@ fi
 echo "Starting second Qwen3-1.7B model on port 8171 (GPU 0)..."
 echo "Available GPUs: $(nvidia-smi -L)"
 echo "GPU 0 status: $(nvidia-smi -i 0 --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits)"
-CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3-1.7B \
+CUDA_VISIBLE_DEVICES=0 vllm serve /nas/ucb/marimeireles/cache/hub/models--Qwen--Qwen3-1.7B/snapshots/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e \
        --host 0.0.0.0 \
        --port 8171 \
        --trust-remote-code \

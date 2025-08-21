@@ -3,9 +3,9 @@
 #SBATCH --output=slurm/%j.log
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=48GB
-#SBATCH --gres=gpu:A100-PCI-80GB:1
+#SBATCH --gres=gpu:A100-SXM4-80GB:1
 #SBATCH --time=24:00:00
-#SBATCH --nodelist=rlhf.ist.berkeley.edu
+#SBATCH --nodelist=airl.ist.berkeley.edu
 
 set -euo pipefail
 set -a

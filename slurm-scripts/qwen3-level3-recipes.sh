@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=Q3-lvl3-5x
+#SBATCH --job-name=Q3-3-2
 #SBATCH --output=slurm/%j.log
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=36GB
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=4GB
 #SBATCH --time=48:00:00
-#SBATCH --nodelist=sac.ist.berkeley.edu
+#SBATCH --nodelist=airl.ist.berkeley.edu
 set -euo pipefail
 
 ###############################################################################
@@ -17,6 +17,14 @@ flush_cache () {
     else
         echo "KV-cache flushed on ${root}"
     fi
+}
+
+###############################################################################
+# Helper: check if local server is reachable (no model assumption)
+###############################################################################
+server_is_ready () {
+    local root="$1"   # expects no /v1 suffix
+    curl -s -m 3 "${root}/v1/models" > /dev/null
 }
 
 ###############################################################################
@@ -42,24 +50,18 @@ micromamba activate "$MAMBA_ROOT_PREFIX/envs/overcooked"
 cd /nas/ucb/$USER/dev/Collab-Overcooked/src
 
 ###############################################################################
-# External Server Configuration  (ONE source of truth)
+# External Server Configuration  (ONE server per LLM model)
 ###############################################################################
 declare -A SERVER_PORTS=(
-    [QWEN3_32B_A]=8320     # p0   Qwen3 32B
-    [QWEN3_32B_B]=8321     # p1   Qwen3 32B
-    [QWEN3_14B_A]=8140     # p0   Qwen3 14B
-    [QWEN3_14B_B]=8141     # p1   Qwen3 14B
-    [QWEN3_8B_A]=8080      # p0   Qwen3 8B
-    [QWEN3_8B_B]=8081      # p1   Qwen3 8B
-    [QWEN3_0_6B_A]=8060    # p0   Qwen3 0.6B
-    [QWEN3_0_6B_B]=8061    # p1   Qwen3 0.6B
-    [QWEN3_1_7B_A]=8170    # p0   Qwen3 1.7B
-    [QWEN3_1_7B_B]=8171    # p1   Qwen3 1.7B
-    [QWEN3_4B_A]=8040      # p0   Qwen3 4B
-    [QWEN3_4B_B]=8041      # p1   Qwen3 4B
+    [QWEN3_32B]=8320    # Qwen3 32B
+    [QWEN3_14B]=8140    # Qwen3 14B
+    [QWEN3_8B]=8080     # Qwen3 8B
+    [QWEN3_0_6B]=8006   # Qwen3 0.6B
+    [QWEN3_1_7B]=8017   # Qwen3 1.7B
+    [QWEN3_4B]=8040     # Qwen3 4B
 )
 
-model_url () { printf 'http://0.0.0.0:%s' "${SERVER_PORTS[$1]}"; }
+model_url () { printf 'http://127.0.0.1:%s' "${SERVER_PORTS[$1]}"; }
 
 ###############################################################################
 # Model directories
@@ -77,9 +79,9 @@ dir_qwen3_4b="/nas/ucb/marimeireles/cache/hub/models--Qwen--Qwen3-4B"
 combinations=(
     'QWEN3_32B QWEN3_14B'
     'QWEN3_8B QWEN3_32B'
-    'QWEN3_0_6B QWEN3_0_6B'
+    # 'QWEN3_0_6B QWEN3_0_6B'
     'QWEN3_8B QWEN3_8B'
-    'QWEN3_1_7B QWEN3_4B'
+    # 'QWEN3_1_7B QWEN3_4B'
     'QWEN3_32B QWEN3_8B'
     'QWEN3_14B QWEN3_1_7B'
     'QWEN3_4B QWEN3_14B'
@@ -90,15 +92,15 @@ combinations=(
     'QWEN3_32B QWEN3_1_7B'
     'QWEN3_14B QWEN3_8B'
     'QWEN3_32B QWEN3_4B'
-    'QWEN3_1_7B QWEN3_1_7B'
-    'QWEN3_4B QWEN3_1_7B'
+    # 'QWEN3_1_7B QWEN3_1_7B'
+    # 'QWEN3_4B QWEN3_1_7B'
     'QWEN3_8B QWEN3_1_7B'
     'QWEN3_32B QWEN3_32B'
     'QWEN3_0_6B QWEN3_8B'
     'QWEN3_0_6B QWEN3_14B'
     'QWEN3_0_6B QWEN3_32B'
-    'QWEN3_0_6B QWEN3_1_7B'
-    'QWEN3_0_6B QWEN3_4B'
+    # 'QWEN3_0_6B QWEN3_1_7B'
+    # 'QWEN3_0_6B QWEN3_4B'
     'QWEN3_1_7B QWEN3_32B'
     'QWEN3_1_7B QWEN3_14B'
     'QWEN3_4B QWEN3_32B'
@@ -173,54 +175,54 @@ for i in {1..5}; do
 
         # Select endpoint and local model directory for p0
         if [[ $p0_model == QWEN3_32B ]]; then
-            p0_server="$(model_url QWEN3_32B_A)/v1"
+            p0_server="$(model_url QWEN3_32B)/v1"
             p0_dir="$dir_qwen3_32b"
             p0_gpt_model="Qwen/Qwen3-32B"
         elif [[ $p0_model == QWEN3_14B ]]; then
-            p0_server="$(model_url QWEN3_14B_A)/v1"
+            p0_server="$(model_url QWEN3_14B)/v1"
             p0_dir="$dir_qwen3_14b"
             p0_gpt_model="Qwen/Qwen3-14B"
         elif [[ $p0_model == QWEN3_8B ]]; then
-            p0_server="$(model_url QWEN3_8B_A)/v1"
+            p0_server="$(model_url QWEN3_8B)/v1"
             p0_dir="$dir_qwen3_8b"
             p0_gpt_model="Qwen/Qwen3-8B"
         elif [[ $p0_model == QWEN3_0_6B ]]; then
-            p0_server="$(model_url QWEN3_0_6B_A)/v1"
+            p0_server="$(model_url QWEN3_0_6B)/v1"
             p0_dir="$dir_qwen3_0_6b"
             p0_gpt_model="Qwen/Qwen3-0.6B"
         elif [[ $p0_model == QWEN3_1_7B ]]; then
-            p0_server="$(model_url QWEN3_1_7B_A)/v1"
+            p0_server="$(model_url QWEN3_1_7B)/v1"
             p0_dir="$dir_qwen3_1_7b"
             p0_gpt_model="Qwen/Qwen3-1.7B"
         elif [[ $p0_model == QWEN3_4B ]]; then
-            p0_server="$(model_url QWEN3_4B_A)/v1"
+            p0_server="$(model_url QWEN3_4B)/v1"
             p0_dir="$dir_qwen3_4b"
             p0_gpt_model="Qwen/Qwen3-4B"
         fi
 
         # Select endpoint and local model directory for p1
         if [[ $p1_model == QWEN3_32B ]]; then
-            p1_server="$(model_url QWEN3_32B_B)/v1"
+            p1_server="$(model_url QWEN3_32B)/v1"
             p1_dir="$dir_qwen3_32b"
             p1_gpt_model="Qwen/Qwen3-32B"
         elif [[ $p1_model == QWEN3_14B ]]; then
-            p1_server="$(model_url QWEN3_14B_B)/v1"
+            p1_server="$(model_url QWEN3_14B)/v1"
             p1_dir="$dir_qwen3_14b"
             p1_gpt_model="Qwen/Qwen3-14B"
         elif [[ $p1_model == QWEN3_8B ]]; then
-            p1_server="$(model_url QWEN3_8B_B)/v1"
+            p1_server="$(model_url QWEN3_8B)/v1"
             p1_dir="$dir_qwen3_8b"
             p1_gpt_model="Qwen/Qwen3-8B"
         elif [[ $p1_model == QWEN3_0_6B ]]; then
-            p1_server="$(model_url QWEN3_0_6B_B)/v1"
+            p1_server="$(model_url QWEN3_0_6B)/v1"
             p1_dir="$dir_qwen3_0_6b"
             p1_gpt_model="Qwen/Qwen3-0.6B"
         elif [[ $p1_model == QWEN3_1_7B ]]; then
-            p1_server="$(model_url QWEN3_1_7B_B)/v1"
+            p1_server="$(model_url QWEN3_1_7B)/v1"
             p1_dir="$dir_qwen3_1_7b"
             p1_gpt_model="Qwen/Qwen3-1.7B"
         elif [[ $p1_model == QWEN3_4B ]]; then
-            p1_server="$(model_url QWEN3_4B_B)/v1"
+            p1_server="$(model_url QWEN3_4B)/v1"
             p1_dir="$dir_qwen3_4b"
             p1_gpt_model="Qwen/Qwen3-4B"
         fi
@@ -229,12 +231,22 @@ for i in {1..5}; do
         echo "P0 Server: $p0_server"
         echo "P1 Server: $p1_server"
 
-        # ---------------------------------------------------------------------
-        # Run the experiment (60-min timeout) .................................
-        # ---------------------------------------------------------------------
-        if timeout 3600 srun --nodes=1 --ntasks=1 python main.py \
+        # Skip if either server is not reachable
+        p0_root="${p0_server%/v1}"
+        p1_root="${p1_server%/v1}"
+        if ! server_is_ready "$p0_root"; then
+            echo "WARNING: P0 server not reachable: $p0_root — skipping combo ${p0_model} vs ${p1_model}"
+            continue
+        fi
+        if ! server_is_ready "$p1_root"; then
+            echo "WARNING: P1 server not reachable: $p1_root — skipping combo ${p0_model} vs ${p1_model}"
+            continue
+        fi
+
+        if srun --nodes=1 --ntasks=1 python main.py \
                 --order "${recipe}" \
                 --temperature 0.7 \
+                --file_prefix "required" \
                 --p0_gpt_model "$p0_gpt_model" \
                 --p1_gpt_model "$p1_gpt_model" \
                 --p0_model_dirname "$p0_dir" \
@@ -244,18 +256,18 @@ for i in {1..5}; do
             echo "Experiment ${p0_model} vs ${p1_model} completed successfully."
         else
             exit_code=$?
-            if [[ $exit_code == 124 ]]; then
-                echo "WARNING: Experiment ${p0_model} vs ${p1_model} timed out."
-            else
-                echo "WARNING: Experiment ${p0_model} vs ${p1_model} failed (code $exit_code)."
-            fi
+            echo "WARNING: Experiment ${p0_model} vs ${p1_model} failed (code $exit_code)."
         fi
 
         # ---------------------------------------------------------------------
-        # Flush KV-cache on both engines
+        # Flush KV-cache on unique engines
         # ---------------------------------------------------------------------
-        flush_cache "${p0_server%/v1}"
-        flush_cache "${p1_server%/v1}"
+        if [[ "${p0_server%/v1}" == "${p1_server%/v1}" ]]; then
+            flush_cache "${p0_server%/v1}"
+        else
+            flush_cache "${p0_server%/v1}"
+            flush_cache "${p1_server%/v1}"
+        fi
 
         echo "=== Completed experiment: ${p0_model} vs ${p1_model} ==="
     done

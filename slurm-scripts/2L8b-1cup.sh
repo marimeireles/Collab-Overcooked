@@ -5,7 +5,7 @@
 #SBATCH --mem=96GB
 #SBATCH --gres=gpu:A100-SXM4-80GB:1
 #SBATCH --time=24:00:00
-#SBATCH --nodelist=sac.ist.berkeley.edu
+#SBATCH --nodelist=airl.ist.berkeley.edu
 
 set -euo pipefail
 set -a
@@ -69,52 +69,33 @@ check_server_ready() {
     return 1
 }
 
-# 7) Launch first vLLM server on port 4140 (GPU 0)
-echo "Starting first Llama model on port 4140 (GPU 0)..."
-CUDA_VISIBLE_DEVICES=0 vllm serve meta-llama/Meta-Llama-3-8B-Instruct \
-       --host 0.0.0.0 \
-       --port 4140 \
-       --trust-remote-code \
-       --gpu-memory-utilization 0.4 \
-       --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8140.log" 2>&1 &
-server1_pid=$!
-
-# Wait for first server to be ready
-if ! check_server_ready "4140" "meta-llama/Meta-Llama-3-8B-Instruct"; then
-    echo "Failed to start server on port 4140. Exiting."
-    kill $server1_pid 2>/dev/null || true
-    exit 1
-fi
-
-# 8) Launch second vLLM server on port 4141 (GPU 0 - same as first)
-echo "Starting second Llama model on port 4141 (GPU 0)..."
+# 7) Launch Llama model on port 4140 (GPU 0)
+echo "Starting Llama model on port 4140 (GPU 0)..."
 echo "Available GPUs: $(nvidia-smi -L)"
 echo "GPU 0 status: $(nvidia-smi -i 0 --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits)"
 CUDA_VISIBLE_DEVICES=0 vllm serve meta-llama/Meta-Llama-3-8B-Instruct \
        --host 0.0.0.0 \
-       --port 4141 \
+       --port 4140 \
        --trust-remote-code \
-       --gpu-memory-utilization 0.4 \
-       --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_8141.log" 2>&1 &
-server2_pid=$!
+       --gpu-memory-utilization 0.8 \
+       --max-model-len 8192 > "/nas/ucb/$USER/dev/Collab-Overcooked/slurm-scripts/slurm/vllm_4140.log" 2>&1 &
+server_pid=$!
 
-# Wait for second server to be ready
-if ! check_server_ready "4141" "meta-llama/Meta-Llama-3-8B-Instruct"; then
-    echo "Failed to start server on port 4141. Exiting."
-    kill $server1_pid 2>/dev/null || true
-    kill $server2_pid 2>/dev/null || true
+# Wait for server to be ready
+if ! check_server_ready "4140" "meta-llama/Meta-Llama-3-8B-Instruct"; then
+    echo "Failed to start server on port 4140. Exiting."
+    kill $server_pid 2>/dev/null || true
     exit 1
 fi
 
-echo "Both servers are running and ready!"
-echo "Server 1: http://localhost:4140/v1"
-echo "Server 2: http://localhost:4141/v1"
+echo "Server is running and ready!"
+echo "Server: http://localhost:4140/v1"
 
-# Keep the script running to maintain the servers
-echo "Servers are running. Press Ctrl+C to stop them."
-trap 'echo "Stopping servers..."; kill $server1_pid $server2_pid 2>/dev/null || true; exit 0' INT TERM
+# Keep the script running to maintain the server
+echo "Server is running. Press Ctrl+C to stop it."
+trap 'echo "Stopping server..."; kill $server_pid 2>/dev/null || true; exit 0' INT TERM
 
-# Wait for either server to finish
+# Wait for server to finish
 wait
 
 

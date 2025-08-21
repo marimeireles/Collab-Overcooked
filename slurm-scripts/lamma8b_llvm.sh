@@ -5,7 +5,7 @@
 #SBATCH --mem=96GB
 #SBATCH --gres=gpu:A6000:2
 #SBATCH --time=6:00:00
-#SBATCH --nodelist=gail.ist.berkeley.edu
+#SBATCH --nodelist=ddpg.ist.berkeley.edu
 
 set -euo pipefail
 set -a

@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=2GB
 #SBATCH --time=00:05:00
-#SBATCH --nodelist=cirl.ist.berkeley.edu
+#SBATCH --nodelist=airl.ist.berkeley.edu
 
 curl -X POST localhost:10000/v1/completions \
      -H "Content-Type: application/json" \

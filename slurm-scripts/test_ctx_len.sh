@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=1GB
 #SBATCH --time=00:01:30
-#SBATCH --nodelist=gail.ist.berkeley.edu
+#SBATCH --nodelist=ddpg.ist.berkeley.edu
 
 # ======= Paths and environment =======
 export MAMBA_ROOT_PREFIX=/nas/ucb/$USER/micromamba
