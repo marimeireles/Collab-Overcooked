@@ -130,9 +130,13 @@ def main(variant):
         # Save directory is now <statistics_save_dir>/experiment_<date>/<p0_model_safe>_<p1_model_safe>/<order>
         save_dir = f"{variant['statistics_save_dir']}/experiment_{current_date}_temp_{variant['temperature']}/{p0_model_safe}_{p1_model_safe}/{variant['order']}"
         os.makedirs(save_dir, exist_ok=True)
+        # Optional filename prefix (only applied when provided via --file_prefix)
+        prefix = variant.get("file_prefix") or ""
+        if prefix:
+            prefix = f"{prefix}_"
         # Filename embeds model names and temperature for clarity as well
-        filename = f"{save_dir}/experiment_{current_time}_chef_{p0_model_safe}_assistant_{p1_model_safe}_{variant['order']}.json"
-
+        filename = f"{save_dir}/{prefix}experiment_{current_time}_chef_{p0_model_safe}_assistant_{p1_model_safe}_{variant['order']}.json"
+        
         # Develop mode: user steps through action_list manually
         if mode == "develop":
             action_list = []
@@ -396,6 +400,12 @@ if __name__ == "__main__":
         type=float,
         default=0.7,
         help="Temperature parameter for LLM generation (default: 0.7)",
+    )
+    parser.add_argument(
+        "--file_prefix",
+        type=str,
+        default="",
+        help="Optional filename prefix for saved statistics (used by orchestration scripts)",
     )
 
     args = parser.parse_args()
