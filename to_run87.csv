@@ -1,8 +1,0 @@
-model_pair,recipe,runs_needed
-Qwen_Qwen3-32B_Qwen_Qwen3-32B,2_boiled_green_bean_slices,10
-Qwen_Qwen3-32B_Qwen_Qwen3-4B,2_boiled_green_bean_slices,10
-Qwen_Qwen3-32B_Qwen_Qwen3-8B,2_boiled_green_bean_slices,10
-Qwen_Qwen3-4B_Qwen_Qwen3-14B,2_boiled_green_bean_slices,10
-Qwen_Qwen3-4B_Qwen_Qwen3-1.7B,2_boiled_green_bean_slices,10
-Qwen_Qwen3-4B_Qwen_Qwen3-32B,2_boiled_green_bean_slices,10
-Qwen_Qwen3-4B_Qwen_Qwen3-4B,2_boiled_green_bean_slices,10

@@ -1,6 +1,0 @@
-model_pair,recipe,runs_needed
-Qwen_Qwen3-4B_Qwen_Qwen3-8B,5_mashed_carrot_and_chickpea_patty,8
-Qwen_Qwen3-4B_Qwen_Qwen3-8B,5_mashed_cauliflower_and_lentil_patty,10
-Qwen_Qwen3-4B_Qwen_Qwen3-8B,5_mashed_potato_and_pea_patty,10
-Qwen_Qwen3-4B_Qwen_Qwen3-8B,5_mashed_sweet_potato_and_bean_patty,10
-Qwen_Qwen3-8B_Qwen_Qwen3-1.7B,1_baked_bell_pepper,6
