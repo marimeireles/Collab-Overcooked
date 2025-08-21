@@ -49,10 +49,15 @@ CONTEXT_WINDOW_LIMITS = {
     "Qwen/Qwen2.5-14B-Instruct": 8192,
     "Qwen/Qwen2.5-32B-Instruct": 26417,
     "meta-llama/Llama-3-8B-Instruct": 8192,
+    # OpenRouter model identifiers for new models
+    "qwen/qwen3-32b": 26417,
+    "qwen/qwen3-14b": 8192,
+    "meta-llama/llama-3.3-70b-instruct": 32768,
+    "google/gemma-3-27b-it": 8192,
     # Uncertain about values below as I only found ctx window output limits for these models
-    "Qwen/Qwen3-0.6B": 8192,
-    "Qwen/Qwen3-1.7B": 8192,
-    "Qwen/Qwen3-4B": 8192,
+    "Qwen/Qwen3-0.6B": 4192,
+    "Qwen/Qwen3-1.7B": 4192,
+    "Qwen/Qwen3-4B": 4192,
     "Qwen/Qwen3-8B": 8192,
     "Qwen/Qwen3-14B": 8192,
     "Qwen/Qwen3-32B": 26417,
@@ -379,6 +384,19 @@ class Module(object):
             }
         ]
         
+        # Conditionally prefix content for small Qwen models (0.6B, 1.7B, 4B) to disable thinking mode
+        model_lower = self.model.lower()
+        should_prefix_never_think = (
+            ("qwen" in model_lower)
+            and (
+                ("0.6" in model_lower or "0_6" in model_lower)
+                or ("1.7" in model_lower or "1_7" in model_lower)
+                or ("-4b" in model_lower)
+            )
+        )
+        never_think_prefix = "/no_think <DO NOT THINK><Never use thinking mode><Never think>\n"
+        never_think_sufix = "/no_think <DO NOT THINK><Never use thinking mode><Never think>\n"
+
         # Get context window limit for this model
         context_limit = self.get_context_window_limit()
         
@@ -409,9 +427,15 @@ class Module(object):
         query = sytem_message + [
             {
                 "role": "user",
-                "content": self.instruction_head_list[0]["content"]
-                + "<input>\n"
-                + truncated_content,
+                "content": (
+                    (never_think_prefix if should_prefix_never_think else "")
+                    + self.instruction_head_list[0]["content"]
+                    + "<input>\n"
+                    + (never_think_prefix if should_prefix_never_think else "")
+                    + truncated_content
+                    + (never_think_prefix if should_prefix_never_think else "")
+                    + (never_think_sufix if should_prefix_never_think else "")
+                ),
             }
         ]
         
@@ -433,9 +457,13 @@ class Module(object):
             query = sytem_message + [
                 {
                     "role": "user",
-                    "content": self.instruction_head_list[0]["content"]
-                    + "<input>\n"
-                    + truncated_content,
+                    "content": (
+                        (never_think_prefix if should_prefix_never_think else "")
+                        + self.instruction_head_list[0]["content"]
+                        + "<input>\n"
+                        + truncated_content
+                        + (never_think_sufix if should_prefix_never_think else "")
+                    ),
                 }
             ]
             
