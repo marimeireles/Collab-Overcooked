@@ -115,6 +115,15 @@ def main(custom_dir=None):
 
     data["level"] = data["order"].apply(get_level)
 
+    # Warn and preserve any orders not mapped to a level
+    unmapped_mask = data["level"].isna()
+    if unmapped_mask.any():
+        missing_orders = sorted(data.loc[unmapped_mask, "order"].unique().tolist())
+        print(
+            f"⚠️  {len(missing_orders)} orders are not mapped to a level and will be grouped under 'unmapped': {missing_orders}"
+        )
+        data.loc[unmapped_mask, "level"] = "unmapped"
+
     columns_to_average = [
         col for col in data.columns if col not in ["model", "order", "level"]
     ]
@@ -123,9 +132,13 @@ def main(custom_dir=None):
         pd.to_numeric, errors="coerce"
     )
 
-    grouped_data = data.groupby(["model", "level"])[columns_to_average].mean()
+    grouped_data = (
+        data.groupby(["model", "level"], dropna=False)[columns_to_average]
+            .mean()
+            .reset_index()
+    )
 
-    grouped_data.to_csv(output_file, sep=",")
+    grouped_data.to_csv(output_file, sep=",", index=False)
     print(f"✅ Converted data saved to: {output_file}")
 
 

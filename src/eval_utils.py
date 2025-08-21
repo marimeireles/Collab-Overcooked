@@ -57,7 +57,7 @@ def get_embedding_from_openai(content):
     openai.api_key = key
     while not get_response:
         try:
-            client = OpenAI(api_key=openai.api_key)
+            client = openai.OpenAI(api_key=openai.api_key)
             response = client.embeddings.create(model=EMBEDDING_MODEL, input=[content])
             get_response = True
             time.sleep(0.5)

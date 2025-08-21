@@ -2,7 +2,7 @@ import json
 import os
 import time
 from argparse import ArgumentParser
-
+from typing import Dict, Optional, List
 import pandas as pd
 
 models = ["gpt-4o"]
@@ -39,6 +39,81 @@ orders = [
     "taro_bean_and_bell_pepper_patty",
     "zucchini_green_pea_and_onion_patty",
 ]
+
+
+def _default_recipe_dir() -> str:
+    """Return the default absolute path to the recipe directory."""
+    return os.path.join(os.path.dirname(__file__), "prompts", "recipe")
+
+
+def build_order_to_level_map(recipe_dir: Optional[str] = None) -> Dict[str, int]:
+    """Scan recipe files named like "<level>_<order>.txt" and build a mapping.
+
+    If recipe_dir is None, uses src/prompts/recipe relative to this file.
+    """
+    directory = recipe_dir or _default_recipe_dir()
+    if not os.path.isdir(directory):
+        raise FileNotFoundError(
+            f"Recipe directory not found: {directory}. Pass --recipe_dir to override."
+        )
+
+    mapping: Dict[str, int] = {}
+    for fname in os.listdir(directory):
+        base, ext = os.path.splitext(fname)
+        if ext.lower() != ".txt":
+            continue
+        parts = base.split("_", 1)
+        if len(parts) != 2:
+            continue
+        level_prefix, order_name = parts
+        if not level_prefix.isdigit():
+            continue
+        mapping[order_name] = int(level_prefix)
+    if not mapping:
+        raise ValueError(
+            f"No valid recipe files found in {directory}. Expected files like '3_baked_potato_soup.txt'"
+        )
+    return mapping
+
+
+def insert_column_after(df: pd.DataFrame, column: str, after: str) -> pd.DataFrame:
+    """Reorder DataFrame to place `column` immediately after `after` if both exist."""
+    if column not in df.columns or after not in df.columns:
+        return df
+    cols: List[str] = list(df.columns)
+    cols.remove(column)
+    insert_at = cols.index(after) + 1
+    cols.insert(insert_at, column)
+    return df[cols]
+
+
+def add_level_column(df: pd.DataFrame, order_to_level: Dict[str, int], error_on_missing: bool = True) -> pd.DataFrame:
+    """Add integer `level` column to df based on `order` using the provided mapping.
+
+    When error_on_missing is True, raises if any orders are unmapped.
+    """
+    if df.empty:
+        return df
+    if "order" not in df.columns:
+        raise KeyError("DataFrame is missing required 'order' column")
+
+    levels = df["order"].map(order_to_level)
+    missing_mask = levels.isna()
+    if error_on_missing and missing_mask.any():
+        missing_orders = sorted(set(df.loc[missing_mask, "order"].astype(str)))
+        raise ValueError(
+            "Orders without a mapped level: " + ", ".join(missing_orders)
+        )
+
+    # Use pandas nullable integer dtype to handle any missing values if allowed
+    df["level"] = levels.astype("Int64")
+    # If all values are present, cast to plain int64
+    if not df["level"].isna().any():
+        df["level"] = df["level"].astype("int64")
+
+    # Place `level` right after `order` for readability
+    df = insert_column_after(df, "level", "order")
+    return df
 
 
 def remove_duplicates(df):
@@ -188,6 +263,7 @@ def process_custom_directory(custom_dir):
             columns=[
                 "model",
                 "order",
+                "level",
                 "success_rate",
                 "time_avg",
                 "time_var",
@@ -241,20 +317,36 @@ def process_custom_directory(custom_dir):
         # Process each task
         for task in tasks:
             task_path = os.path.join(model_combo_path, task)
-            
-            # Try experiment-specific filename first, then fall back to default
+
+            # Build candidate filenames in priority order:
+            # 1) evaluation_result_{task}.json                        ← produced when no 'experiment*' in path
+            # 2) evaluation_result_{experiment_name}.json             ← produced when 'experiment*' exists in path
+            # 3) evaluation_result.json                               ← legacy name
             experiment_name = extract_experiment_name(custom_dir)
-            eval_file = os.path.join(task_path, f"evaluation_result_{experiment_name}.json")
-            
-            # Fallback to default filename if experiment-specific doesn't exist
-            if not os.path.exists(eval_file):
-                eval_file = os.path.join(task_path, "evaluation_result.json")
-            
+            candidate_files = [
+                os.path.join(task_path, f"evaluation_result_{task}.json"),
+                os.path.join(task_path, f"evaluation_result_{experiment_name}.json"),
+                os.path.join(task_path, "evaluation_result.json"),
+            ]
+
+            eval_file = None
+            for candidate in candidate_files:
+                if os.path.exists(candidate):
+                    eval_file = candidate
+                    break
+
+            if eval_file is None:
+                print(f"Warning: No evaluation_result*.json found in {task_path} (tried: {', '.join(os.path.basename(c) for c in candidate_files)})")
+                continue
+
             # Use model_combo as the model name
             df = process_single_evaluation(model_combo, task, eval_file, df)
     
     # Final cleanup to ensure no duplicates remain
     df = remove_duplicates(df)
+    # Compute level column from recipes
+    order_to_level = build_order_to_level_map()
+    df = add_level_column(df, order_to_level)
     
     # Save the updated dataframe
     df.to_csv(excel_path, index=False)
@@ -286,6 +378,7 @@ def main(variant):
             columns=[
                 "model",
                 "order",
+                "level",
                 "success_rate",
                 "time_avg",
                 "time_var",
@@ -312,6 +405,9 @@ def main(variant):
     
     # Final cleanup to ensure no duplicates remain
     df = remove_duplicates(df)
+    # Compute level column from recipes
+    order_to_level = build_order_to_level_map()
+    df = add_level_column(df, order_to_level)
     df.to_csv(excel_path, index=False)
 
 
@@ -347,6 +443,7 @@ if __name__ == "__main__":
         default=None,
         help="Custom directory path for processing 3-level structure from main.py experiments",
     )
+    # No extra flags required; level is always computed from recipes for all outputs
     args = parser.parse_args()
     variant = vars(args)
 

@@ -19,10 +19,10 @@ if [ $# -eq 1 ]; then
     echo "1. Running evaluation with auto order detection..."
     /usr/bin/env ${python_dir} -- evaluation.py --test_mode custom_dir --log_dir "$CUSTOM_DIR" --order AUTO
     
-    echo "2. Processing results..."
+    echo "2. Processing results (statistics_data_<experiment>.csv)..."
     /usr/bin/env ${python_dir} -- organize_result.py --custom_dir "$CUSTOM_DIR"
     
-    echo "3. Converting results by levels..."
+    echo "3. Converting results by levels (converted_data_<experiment>.csv)..."
     /usr/bin/env ${python_dir} -- convert_result.py --custom_dir "$CUSTOM_DIR"
     
 else
