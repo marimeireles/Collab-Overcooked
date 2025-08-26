@@ -1,0 +1,26 @@
+model_combination,fuzzy hierarchy,clear hierarchy,no hierarchy
+Qwen_Qwen3-1.7B_Qwen_Qwen3-1.7B,0.825,0.0,0.175
+Qwen_Qwen3-1.7B_Qwen_Qwen3-14B,0.975,0.0,0.025
+Qwen_Qwen3-1.7B_Qwen_Qwen3-32B,0.95,0.025,0.025
+Qwen_Qwen3-1.7B_Qwen_Qwen3-4B,0.9743589743589743,0.0,0.02564102564102564
+Qwen_Qwen3-1.7B_Qwen_Qwen3-8B,0.825,0.05,0.125
+Qwen_Qwen3-14B_Qwen_Qwen3-1.7B,0.975,0.025,0.0
+Qwen_Qwen3-14B_Qwen_Qwen3-14B,0.675,0.325,0.0
+Qwen_Qwen3-14B_Qwen_Qwen3-32B,0.75,0.225,0.025
+Qwen_Qwen3-14B_Qwen_Qwen3-4B,0.875,0.125,0.0
+Qwen_Qwen3-14B_Qwen_Qwen3-8B,0.8,0.2,0.0
+Qwen_Qwen3-32B_Qwen_Qwen3-1.7B,0.975,0.025,0.0
+Qwen_Qwen3-32B_Qwen_Qwen3-14B,0.775,0.2,0.025
+Qwen_Qwen3-32B_Qwen_Qwen3-32B,0.825,0.15,0.025
+Qwen_Qwen3-32B_Qwen_Qwen3-4B,0.8974358974358975,0.10256410256410256,0.0
+Qwen_Qwen3-32B_Qwen_Qwen3-8B,0.825,0.175,0.0
+Qwen_Qwen3-4B_Qwen_Qwen3-1.7B,0.95,0.0,0.05
+Qwen_Qwen3-4B_Qwen_Qwen3-14B,0.875,0.1,0.025
+Qwen_Qwen3-4B_Qwen_Qwen3-32B,0.925,0.075,0.0
+Qwen_Qwen3-4B_Qwen_Qwen3-4B,0.95,0.025,0.025
+Qwen_Qwen3-4B_Qwen_Qwen3-8B,0.875,0.1,0.025
+Qwen_Qwen3-8B_Qwen_Qwen3-1.7B,0.95,0.0,0.05
+Qwen_Qwen3-8B_Qwen_Qwen3-14B,0.875,0.1,0.025
+Qwen_Qwen3-8B_Qwen_Qwen3-32B,0.825,0.175,0.0
+Qwen_Qwen3-8B_Qwen_Qwen3-4B,0.9,0.05,0.05
+Qwen_Qwen3-8B_Qwen_Qwen3-8B,0.825,0.1,0.075
