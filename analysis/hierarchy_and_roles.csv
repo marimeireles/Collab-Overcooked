@@ -1,0 +1,101 @@
+recipe,model_combination,fuzzy_hierarchy,no_hierarchy,clear_hierarchy,avg_interactions,avg_sampled,avg_processing_time_seconds,success_reasons,agent_0_roles,agent_1_roles,total_outcomes
+baked_pumpkin_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-1.7B,6,4,0,467.4,17.5,31.4,No specific reasons,[0],[0],10
+baked_pumpkin_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-14B,10,0,0,178.6,18.0,36.1,No specific reasons,[0],[0],10
+baked_pumpkin_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-32B,9,0,1,281.9,18.0,26.32,No specific reasons,"[0, 1]",[0],10
+baked_pumpkin_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-4B,9,1,0,234.8,18.0,41.28,No specific reasons,[0],[0],10
+baked_pumpkin_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-8B,10,0,0,188.7,16.8,32.27,No specific reasons,[0],[0],10
+baked_pumpkin_slices,Qwen_Qwen3-14B_Qwen_Qwen3-1.7B,10,0,0,359.2,15.4,36.48,No specific reasons,[0],[0],10
+baked_pumpkin_slices,Qwen_Qwen3-14B_Qwen_Qwen3-14B,6,0,4,94.0,17.6,37.66,No specific reasons,"[0, 1]",[0],10
+baked_pumpkin_slices,Qwen_Qwen3-14B_Qwen_Qwen3-32B,5,1,4,78.8,17.3,29.97,No specific reasons,"[1, 0]",[0],10
+baked_pumpkin_slices,Qwen_Qwen3-14B_Qwen_Qwen3-4B,9,0,1,85.4,18.0,33.4,No specific reasons,"[0, 1]",[0],10
+baked_pumpkin_slices,Qwen_Qwen3-14B_Qwen_Qwen3-8B,9,0,1,75.1,17.9,37.48,No specific reasons,"[0, 1]",[0],10
+baked_pumpkin_slices,Qwen_Qwen3-32B_Qwen_Qwen3-1.7B,10,0,0,378.1,16.6,31.04,No specific reasons,[0],[0],10
+baked_pumpkin_slices,Qwen_Qwen3-32B_Qwen_Qwen3-14B,9,0,1,128.3,18.0,28.63,No specific reasons,"[0, 1]",[0],10
+baked_pumpkin_slices,Qwen_Qwen3-32B_Qwen_Qwen3-32B,9,0,1,103.0,18.0,34.71,No specific reasons,"[0, 1]",[0],10
+baked_pumpkin_slices,Qwen_Qwen3-32B_Qwen_Qwen3-4B,8,0,2,118.4,16.0,32.8,No specific reasons,"[0, 1]",[0],10
+baked_pumpkin_slices,Qwen_Qwen3-32B_Qwen_Qwen3-8B,9,0,1,73.7,18.0,28.5,No specific reasons,"[0, 1]",[0],10
+baked_pumpkin_slices,Qwen_Qwen3-4B_Qwen_Qwen3-1.7B,10,0,0,293.1,17.2,33.87,No specific reasons,[0],[0],10
+baked_pumpkin_slices,Qwen_Qwen3-4B_Qwen_Qwen3-14B,10,0,0,70.4,16.7,38.27,No specific reasons,[0],[0],10
+baked_pumpkin_slices,Qwen_Qwen3-4B_Qwen_Qwen3-32B,9,0,1,170.2,18.0,50.48,No specific reasons,"[0, 1]",[0],10
+baked_pumpkin_slices,Qwen_Qwen3-4B_Qwen_Qwen3-4B,9,1,0,38.5,14.9,32.84,No specific reasons,[0],[0],10
+baked_pumpkin_slices,Qwen_Qwen3-4B_Qwen_Qwen3-8B,8,0,2,52.55,16.0,99.79,{'Error occurred during analysis': 1},"[1, 0]","[0, 1]",10
+baked_pumpkin_slices,Qwen_Qwen3-8B_Qwen_Qwen3-1.7B,10,0,0,419.7,18.0,36.5,No specific reasons,[0],[0],10
+baked_pumpkin_slices,Qwen_Qwen3-8B_Qwen_Qwen3-14B,10,0,0,124.1,18.0,33.03,No specific reasons,[0],[0],10
+baked_pumpkin_slices,Qwen_Qwen3-8B_Qwen_Qwen3-32B,9,0,1,136.2,18.0,36.39,No specific reasons,"[0, 1]",[0],10
+baked_pumpkin_slices,Qwen_Qwen3-8B_Qwen_Qwen3-4B,8,1,1,39.6,13.8,26.81,No specific reasons,"[0, 1]",[0],10
+baked_pumpkin_slices,Qwen_Qwen3-8B_Qwen_Qwen3-8B,9,0,1,77.9,16.8,39.9,No specific reasons,"[0, 1]",[0],10
+boiled_corn_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-1.7B,10,0,0,350.5,17.1,39.69,No specific reasons,[0],[0],10
+boiled_corn_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-14B,10,0,0,233.4,18.0,32.22,No specific reasons,[0],[0],10
+boiled_corn_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-32B,10,0,0,256.18,18.0,34.19,{'Error occurred during analysis': 1},[0],[0],10
+boiled_corn_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-4B,10,0,0,205.0,18.0,39.6,No specific reasons,[0],[0],10
+boiled_corn_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-8B,7,2,1,183.1,18.0,32.09,No specific reasons,"[0, 1]",[0],10
+boiled_corn_slices,Qwen_Qwen3-14B_Qwen_Qwen3-1.7B,10,0,0,330.9,16.1,35.43,No specific reasons,[0],[0],10
+boiled_corn_slices,Qwen_Qwen3-14B_Qwen_Qwen3-14B,5,0,5,101.2,17.3,30.62,No specific reasons,"[1, 0]",[0],10
+boiled_corn_slices,Qwen_Qwen3-14B_Qwen_Qwen3-32B,6,0,4,141.18,18.0,38.6,{'Error occurred during analysis': 1},"[0, 1]",[0],10
+boiled_corn_slices,Qwen_Qwen3-14B_Qwen_Qwen3-4B,7,0,3,65.7,15.7,32.65,No specific reasons,"[1, 0]",[0],10
+boiled_corn_slices,Qwen_Qwen3-14B_Qwen_Qwen3-8B,7,0,3,82.3,14.6,44.43,No specific reasons,"[0, 1]",[0],10
+boiled_corn_slices,Qwen_Qwen3-32B_Qwen_Qwen3-1.7B,9,0,1,461.5,17.9,32.1,No specific reasons,[0],"[0, 1]",10
+boiled_corn_slices,Qwen_Qwen3-32B_Qwen_Qwen3-14B,6,0,4,86.7,17.2,33.76,No specific reasons,"[0, 1]",[0],10
+boiled_corn_slices,Qwen_Qwen3-32B_Qwen_Qwen3-32B,8,1,1,128.9,18.0,27.25,No specific reasons,"[0, 1]",[0],10
+boiled_corn_slices,Qwen_Qwen3-32B_Qwen_Qwen3-4B,9,0,0,92.22,14.44,34.92,No specific reasons,[0],[0],9
+boiled_corn_slices,Qwen_Qwen3-32B_Qwen_Qwen3-8B,7,0,3,87.7,17.6,35.53,No specific reasons,"[0, 1]",[0],10
+boiled_corn_slices,Qwen_Qwen3-4B_Qwen_Qwen3-1.7B,9,1,0,335.6,17.7,32.67,No specific reasons,[0],[0],10
+boiled_corn_slices,Qwen_Qwen3-4B_Qwen_Qwen3-14B,9,0,1,107.0,18.0,32.17,No specific reasons,"[0, 1]",[0],10
+boiled_corn_slices,Qwen_Qwen3-4B_Qwen_Qwen3-32B,9,0,1,84.6,16.7,77.47,No specific reasons,"[0, 1]",[0],10
+boiled_corn_slices,Qwen_Qwen3-4B_Qwen_Qwen3-4B,10,0,0,37.0,16.7,34.45,No specific reasons,[0],[0],10
+boiled_corn_slices,Qwen_Qwen3-4B_Qwen_Qwen3-8B,9,1,0,65.9,12.8,39.53,No specific reasons,[0],[0],10
+boiled_corn_slices,Qwen_Qwen3-8B_Qwen_Qwen3-1.7B,8,2,0,333.5,17.3,30.01,No specific reasons,[0],[0],10
+boiled_corn_slices,Qwen_Qwen3-8B_Qwen_Qwen3-14B,8,1,1,139.4,18.0,37.4,No specific reasons,"[0, 1]",[0],10
+boiled_corn_slices,Qwen_Qwen3-8B_Qwen_Qwen3-32B,8,0,2,194.1,17.4,31.29,No specific reasons,"[0, 1]",[0],10
+boiled_corn_slices,Qwen_Qwen3-8B_Qwen_Qwen3-4B,9,0,1,24.1,9.1,28.05,No specific reasons,"[0, 1]",[0],10
+boiled_corn_slices,Qwen_Qwen3-8B_Qwen_Qwen3-8B,8,1,1,60.9,15.7,27.2,No specific reasons,"[0, 1]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-1.7B,8,2,0,439.9,16.8,36.11,No specific reasons,[0],[0],10
+boiled_green_bean_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-14B,10,0,0,189.5,18.0,30.04,No specific reasons,[0],[0],10
+boiled_green_bean_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-32B,10,0,0,213.0,18.0,42.14,No specific reasons,[0],[0],10
+boiled_green_bean_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-4B,10,0,0,280.2,17.0,32.01,No specific reasons,[0],[0],10
+boiled_green_bean_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-8B,6,3,1,237.5,17.7,39.11,No specific reasons,"[0, 1]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-14B_Qwen_Qwen3-1.7B,10,0,0,236.2,15.4,30.84,No specific reasons,[0],[0],10
+boiled_green_bean_slices,Qwen_Qwen3-14B_Qwen_Qwen3-14B,8,0,2,120.9,18.0,36.96,No specific reasons,"[0, 1]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-14B_Qwen_Qwen3-32B,9,0,1,132.3,18.0,35.22,No specific reasons,"[0, 1]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-14B_Qwen_Qwen3-4B,10,0,0,59.4,16.7,32.19,No specific reasons,[0],[0],10
+boiled_green_bean_slices,Qwen_Qwen3-14B_Qwen_Qwen3-8B,8,0,2,40.8,16.1,33.45,No specific reasons,"[0, 1]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-32B_Qwen_Qwen3-1.7B,10,0,0,398.4,16.6,38.79,No specific reasons,[0],[0],10
+boiled_green_bean_slices,Qwen_Qwen3-32B_Qwen_Qwen3-14B,7,1,2,65.3,18.0,29.91,No specific reasons,"[0, 1]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-32B_Qwen_Qwen3-32B,8,0,2,130.9,18.0,31.99,No specific reasons,"[0, 1]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-32B_Qwen_Qwen3-4B,9,0,1,97.1,15.9,33.62,No specific reasons,"[0, 1]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-32B_Qwen_Qwen3-8B,8,0,2,85.1,17.4,29.45,No specific reasons,"[0, 1]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-4B_Qwen_Qwen3-1.7B,9,1,0,434.1,16.7,33.51,No specific reasons,[0],[0],10
+boiled_green_bean_slices,Qwen_Qwen3-4B_Qwen_Qwen3-14B,7,1,2,107.6,16.7,32.28,No specific reasons,"[0, 1]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-4B_Qwen_Qwen3-32B,10,0,0,109.4,17.9,34.64,No specific reasons,[0],[0],10
+boiled_green_bean_slices,Qwen_Qwen3-4B_Qwen_Qwen3-4B,10,0,0,97.4,17.5,34.03,No specific reasons,[0],[0],10
+boiled_green_bean_slices,Qwen_Qwen3-4B_Qwen_Qwen3-8B,9,0,1,51.3,15.9,84.34,No specific reasons,"[0, 1]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-8B_Qwen_Qwen3-1.7B,10,0,0,340.0,17.5,33.48,No specific reasons,[0],[0],10
+boiled_green_bean_slices,Qwen_Qwen3-8B_Qwen_Qwen3-14B,9,0,1,96.3,18.0,35.71,No specific reasons,"[0, 1]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-8B_Qwen_Qwen3-32B,7,0,3,149.4,18.0,35.09,No specific reasons,"[1, 0]",[0],10
+boiled_green_bean_slices,Qwen_Qwen3-8B_Qwen_Qwen3-4B,9,1,0,149.5,18.0,28.38,No specific reasons,[0],[0],10
+boiled_green_bean_slices,Qwen_Qwen3-8B_Qwen_Qwen3-8B,7,2,1,134.6,17.3,32.65,No specific reasons,"[1, 0]",[0],10
+boiled_potato_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-1.7B,9,1,0,172.0,16.9,33.43,No specific reasons,[0],[0],10
+boiled_potato_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-14B,9,1,0,183.7,18.0,22.16,No specific reasons,[0],[0],10
+boiled_potato_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-32B,9,1,0,135.3,18.0,25.75,No specific reasons,[0],[0],10
+boiled_potato_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-4B,9,0,0,197.56,17.11,37.93,No specific reasons,[0],[0],9
+boiled_potato_slices,Qwen_Qwen3-1.7B_Qwen_Qwen3-8B,10,0,0,188.8,17.4,43.37,No specific reasons,[0],[0],10
+boiled_potato_slices,Qwen_Qwen3-14B_Qwen_Qwen3-1.7B,9,0,1,379.9,17.1,33.2,No specific reasons,"[0, 1]",[0],10
+boiled_potato_slices,Qwen_Qwen3-14B_Qwen_Qwen3-14B,8,0,2,100.7,18.0,45.04,No specific reasons,"[1, 0]",[0],10
+boiled_potato_slices,Qwen_Qwen3-14B_Qwen_Qwen3-32B,10,0,0,96.4,16.9,29.94,No specific reasons,[0],[0],10
+boiled_potato_slices,Qwen_Qwen3-14B_Qwen_Qwen3-4B,9,0,1,109.3,17.1,33.03,No specific reasons,"[0, 1]",[0],10
+boiled_potato_slices,Qwen_Qwen3-14B_Qwen_Qwen3-8B,8,0,2,48.1,17.4,41.56,No specific reasons,"[1, 0]",[0],10
+boiled_potato_slices,Qwen_Qwen3-32B_Qwen_Qwen3-1.7B,10,0,0,266.1,16.4,35.2,No specific reasons,[0],[0],10
+boiled_potato_slices,Qwen_Qwen3-32B_Qwen_Qwen3-14B,9,0,1,82.8,18.0,38.24,No specific reasons,[0],"[0, 1]",10
+boiled_potato_slices,Qwen_Qwen3-32B_Qwen_Qwen3-32B,8,0,2,152.6,18.0,42.18,No specific reasons,"[0, 1]",[0],10
+boiled_potato_slices,Qwen_Qwen3-32B_Qwen_Qwen3-4B,9,0,1,91.4,15.9,31.2,No specific reasons,"[0, 1]",[0],10
+boiled_potato_slices,Qwen_Qwen3-32B_Qwen_Qwen3-8B,9,0,1,75.9,17.5,30.69,No specific reasons,"[0, 1]",[0],10
+boiled_potato_slices,Qwen_Qwen3-4B_Qwen_Qwen3-1.7B,10,0,0,231.3,16.7,36.39,No specific reasons,[0],[0],10
+boiled_potato_slices,Qwen_Qwen3-4B_Qwen_Qwen3-14B,9,0,1,71.7,18.0,30.21,No specific reasons,"[0, 1]",[0],10
+boiled_potato_slices,Qwen_Qwen3-4B_Qwen_Qwen3-32B,9,0,1,182.8,18.0,45.87,No specific reasons,"[0, 1]",[0],10
+boiled_potato_slices,Qwen_Qwen3-4B_Qwen_Qwen3-4B,9,0,1,75.6,16.5,41.09,No specific reasons,"[1, 0]",[0],10
+boiled_potato_slices,Qwen_Qwen3-4B_Qwen_Qwen3-8B,9,0,1,122.3,16.9,63.9,No specific reasons,"[0, 1]",[0],10
+boiled_potato_slices,Qwen_Qwen3-8B_Qwen_Qwen3-1.7B,10,0,0,270.5,18.0,40.58,No specific reasons,[0],[0],10
+boiled_potato_slices,Qwen_Qwen3-8B_Qwen_Qwen3-14B,8,0,2,79.8,17.1,37.79,No specific reasons,"[1, 0]",[0],10
+boiled_potato_slices,Qwen_Qwen3-8B_Qwen_Qwen3-32B,9,0,1,95.3,18.0,36.22,No specific reasons,"[0, 1]",[0],10
+boiled_potato_slices,Qwen_Qwen3-8B_Qwen_Qwen3-4B,10,0,0,53.2,16.4,31.94,No specific reasons,[0],[0],10
+boiled_potato_slices,Qwen_Qwen3-8B_Qwen_Qwen3-8B,9,0,1,69.4,18.0,33.55,No specific reasons,"[0, 1]",[0],10

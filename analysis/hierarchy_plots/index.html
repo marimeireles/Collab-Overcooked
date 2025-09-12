@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hierarchy Analysis Gallery</title>
+<style>
+  body {
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    margin: 24px;
+    line-height: 1.4;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 12px 0;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 16px;
+  }
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  .nav a {
+    text-decoration: none;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  section {
+    margin-bottom: 32px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    align-items: start;
+  }
+  figure {
+    margin: 0;
+  }
+  figcaption {
+    margin-top: 6px;
+    font-size: 0.9rem;
+    color: #444;
+  }
+  h1, h2 {
+    margin: 8px 0 12px 0;
+  }
+  .tables a {
+    display: inline-block;
+    margin-right: 12px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Hierarchy Analysis — Side-by-side Gallery</h1>
+    <div class="tables">
+      <strong>Summary tables:</strong>
+      <a href="hierarchy_counts_by_pair.csv" download>counts CSV</a>
+      <a href="hierarchy_proportions_by_pair.csv" download>proportions CSV</a>
+      <a href="chef_attribution_clear_by_pair.csv" download>chef CSV</a>
+    </div>
+    <div class="nav">
+      <a href="#qwen_qwen3_1_7b_qwen_qwen3_1_7b">Qwen_Qwen3-1.7B_Qwen_Qwen3-1.7B</a> | <a href="#qwen_qwen3_1_7b_qwen_qwen3_14b">Qwen_Qwen3-1.7B_Qwen_Qwen3-14B</a> | <a href="#qwen_qwen3_1_7b_qwen_qwen3_32b">Qwen_Qwen3-1.7B_Qwen_Qwen3-32B</a> | <a href="#qwen_qwen3_1_7b_qwen_qwen3_4b">Qwen_Qwen3-1.7B_Qwen_Qwen3-4B</a> | <a href="#qwen_qwen3_1_7b_qwen_qwen3_8b">Qwen_Qwen3-1.7B_Qwen_Qwen3-8B</a> | <a href="#qwen_qwen3_14b_qwen_qwen3_1_7b">Qwen_Qwen3-14B_Qwen_Qwen3-1.7B</a> | <a href="#qwen_qwen3_14b_qwen_qwen3_14b">Qwen_Qwen3-14B_Qwen_Qwen3-14B</a> | <a href="#qwen_qwen3_14b_qwen_qwen3_32b">Qwen_Qwen3-14B_Qwen_Qwen3-32B</a> | <a href="#qwen_qwen3_14b_qwen_qwen3_4b">Qwen_Qwen3-14B_Qwen_Qwen3-4B</a> | <a href="#qwen_qwen3_14b_qwen_qwen3_8b">Qwen_Qwen3-14B_Qwen_Qwen3-8B</a> | <a href="#qwen_qwen3_32b_qwen_qwen3_1_7b">Qwen_Qwen3-32B_Qwen_Qwen3-1.7B</a> | <a href="#qwen_qwen3_32b_qwen_qwen3_14b">Qwen_Qwen3-32B_Qwen_Qwen3-14B</a> | <a href="#qwen_qwen3_32b_qwen_qwen3_32b">Qwen_Qwen3-32B_Qwen_Qwen3-32B</a> | <a href="#qwen_qwen3_32b_qwen_qwen3_4b">Qwen_Qwen3-32B_Qwen_Qwen3-4B</a> | <a href="#qwen_qwen3_32b_qwen_qwen3_8b">Qwen_Qwen3-32B_Qwen_Qwen3-8B</a> | <a href="#qwen_qwen3_4b_qwen_qwen3_1_7b">Qwen_Qwen3-4B_Qwen_Qwen3-1.7B</a> | <a href="#qwen_qwen3_4b_qwen_qwen3_14b">Qwen_Qwen3-4B_Qwen_Qwen3-14B</a> | <a href="#qwen_qwen3_4b_qwen_qwen3_32b">Qwen_Qwen3-4B_Qwen_Qwen3-32B</a> | <a href="#qwen_qwen3_4b_qwen_qwen3_4b">Qwen_Qwen3-4B_Qwen_Qwen3-4B</a> | <a href="#qwen_qwen3_4b_qwen_qwen3_8b">Qwen_Qwen3-4B_Qwen_Qwen3-8B</a> | <a href="#qwen_qwen3_8b_qwen_qwen3_1_7b">Qwen_Qwen3-8B_Qwen_Qwen3-1.7B</a> | <a href="#qwen_qwen3_8b_qwen_qwen3_14b">Qwen_Qwen3-8B_Qwen_Qwen3-14B</a> | <a href="#qwen_qwen3_8b_qwen_qwen3_32b">Qwen_Qwen3-8B_Qwen_Qwen3-32B</a> | <a href="#qwen_qwen3_8b_qwen_qwen3_4b">Qwen_Qwen3-8B_Qwen_Qwen3-4B</a> | <a href="#qwen_qwen3_8b_qwen_qwen3_8b">Qwen_Qwen3-8B_Qwen_Qwen3-8B</a>
+    </div>
+  </header>
+  
+        <section id="qwen_qwen3_1_7b_qwen_qwen3_1_7b">
+          <h2>Qwen_Qwen3-1.7B_Qwen_Qwen3-1.7B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_1_7b_qwen_qwen3_1_7b_counts.png" alt="Counts: Qwen_Qwen3-1.7B_Qwen_Qwen3-1.7B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_1_7b_qwen_qwen3_1_7b_proportions.png" alt="Proportions: Qwen_Qwen3-1.7B_Qwen_Qwen3-1.7B"><figcaption>Proportions</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_1_7b_qwen_qwen3_14b">
+          <h2>Qwen_Qwen3-1.7B_Qwen_Qwen3-14B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_1_7b_qwen_qwen3_14b_counts.png" alt="Counts: Qwen_Qwen3-1.7B_Qwen_Qwen3-14B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_1_7b_qwen_qwen3_14b_proportions.png" alt="Proportions: Qwen_Qwen3-1.7B_Qwen_Qwen3-14B"><figcaption>Proportions</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_1_7b_qwen_qwen3_32b">
+          <h2>Qwen_Qwen3-1.7B_Qwen_Qwen3-32B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_1_7b_qwen_qwen3_32b_counts.png" alt="Counts: Qwen_Qwen3-1.7B_Qwen_Qwen3-32B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_1_7b_qwen_qwen3_32b_proportions.png" alt="Proportions: Qwen_Qwen3-1.7B_Qwen_Qwen3-32B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_1_7b_qwen_qwen3_32b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-1.7B_Qwen_Qwen3-32B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_1_7b_qwen_qwen3_4b">
+          <h2>Qwen_Qwen3-1.7B_Qwen_Qwen3-4B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_1_7b_qwen_qwen3_4b_counts.png" alt="Counts: Qwen_Qwen3-1.7B_Qwen_Qwen3-4B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_1_7b_qwen_qwen3_4b_proportions.png" alt="Proportions: Qwen_Qwen3-1.7B_Qwen_Qwen3-4B"><figcaption>Proportions</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_1_7b_qwen_qwen3_8b">
+          <h2>Qwen_Qwen3-1.7B_Qwen_Qwen3-8B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_1_7b_qwen_qwen3_8b_counts.png" alt="Counts: Qwen_Qwen3-1.7B_Qwen_Qwen3-8B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_1_7b_qwen_qwen3_8b_proportions.png" alt="Proportions: Qwen_Qwen3-1.7B_Qwen_Qwen3-8B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_1_7b_qwen_qwen3_8b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-1.7B_Qwen_Qwen3-8B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_14b_qwen_qwen3_1_7b">
+          <h2>Qwen_Qwen3-14B_Qwen_Qwen3-1.7B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_14b_qwen_qwen3_1_7b_counts.png" alt="Counts: Qwen_Qwen3-14B_Qwen_Qwen3-1.7B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_14b_qwen_qwen3_1_7b_proportions.png" alt="Proportions: Qwen_Qwen3-14B_Qwen_Qwen3-1.7B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_14b_qwen_qwen3_1_7b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-14B_Qwen_Qwen3-1.7B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_14b_qwen_qwen3_14b">
+          <h2>Qwen_Qwen3-14B_Qwen_Qwen3-14B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_14b_qwen_qwen3_14b_counts.png" alt="Counts: Qwen_Qwen3-14B_Qwen_Qwen3-14B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_14b_qwen_qwen3_14b_proportions.png" alt="Proportions: Qwen_Qwen3-14B_Qwen_Qwen3-14B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_14b_qwen_qwen3_14b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-14B_Qwen_Qwen3-14B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_14b_qwen_qwen3_32b">
+          <h2>Qwen_Qwen3-14B_Qwen_Qwen3-32B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_14b_qwen_qwen3_32b_counts.png" alt="Counts: Qwen_Qwen3-14B_Qwen_Qwen3-32B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_14b_qwen_qwen3_32b_proportions.png" alt="Proportions: Qwen_Qwen3-14B_Qwen_Qwen3-32B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_14b_qwen_qwen3_32b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-14B_Qwen_Qwen3-32B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_14b_qwen_qwen3_4b">
+          <h2>Qwen_Qwen3-14B_Qwen_Qwen3-4B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_14b_qwen_qwen3_4b_counts.png" alt="Counts: Qwen_Qwen3-14B_Qwen_Qwen3-4B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_14b_qwen_qwen3_4b_proportions.png" alt="Proportions: Qwen_Qwen3-14B_Qwen_Qwen3-4B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_14b_qwen_qwen3_4b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-14B_Qwen_Qwen3-4B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_14b_qwen_qwen3_8b">
+          <h2>Qwen_Qwen3-14B_Qwen_Qwen3-8B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_14b_qwen_qwen3_8b_counts.png" alt="Counts: Qwen_Qwen3-14B_Qwen_Qwen3-8B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_14b_qwen_qwen3_8b_proportions.png" alt="Proportions: Qwen_Qwen3-14B_Qwen_Qwen3-8B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_14b_qwen_qwen3_8b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-14B_Qwen_Qwen3-8B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_32b_qwen_qwen3_1_7b">
+          <h2>Qwen_Qwen3-32B_Qwen_Qwen3-1.7B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_32b_qwen_qwen3_1_7b_counts.png" alt="Counts: Qwen_Qwen3-32B_Qwen_Qwen3-1.7B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_32b_qwen_qwen3_1_7b_proportions.png" alt="Proportions: Qwen_Qwen3-32B_Qwen_Qwen3-1.7B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_32b_qwen_qwen3_1_7b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-32B_Qwen_Qwen3-1.7B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_32b_qwen_qwen3_14b">
+          <h2>Qwen_Qwen3-32B_Qwen_Qwen3-14B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_32b_qwen_qwen3_14b_counts.png" alt="Counts: Qwen_Qwen3-32B_Qwen_Qwen3-14B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_32b_qwen_qwen3_14b_proportions.png" alt="Proportions: Qwen_Qwen3-32B_Qwen_Qwen3-14B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_32b_qwen_qwen3_14b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-32B_Qwen_Qwen3-14B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_32b_qwen_qwen3_32b">
+          <h2>Qwen_Qwen3-32B_Qwen_Qwen3-32B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_32b_qwen_qwen3_32b_counts.png" alt="Counts: Qwen_Qwen3-32B_Qwen_Qwen3-32B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_32b_qwen_qwen3_32b_proportions.png" alt="Proportions: Qwen_Qwen3-32B_Qwen_Qwen3-32B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_32b_qwen_qwen3_32b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-32B_Qwen_Qwen3-32B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_32b_qwen_qwen3_4b">
+          <h2>Qwen_Qwen3-32B_Qwen_Qwen3-4B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_32b_qwen_qwen3_4b_counts.png" alt="Counts: Qwen_Qwen3-32B_Qwen_Qwen3-4B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_32b_qwen_qwen3_4b_proportions.png" alt="Proportions: Qwen_Qwen3-32B_Qwen_Qwen3-4B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_32b_qwen_qwen3_4b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-32B_Qwen_Qwen3-4B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_32b_qwen_qwen3_8b">
+          <h2>Qwen_Qwen3-32B_Qwen_Qwen3-8B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_32b_qwen_qwen3_8b_counts.png" alt="Counts: Qwen_Qwen3-32B_Qwen_Qwen3-8B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_32b_qwen_qwen3_8b_proportions.png" alt="Proportions: Qwen_Qwen3-32B_Qwen_Qwen3-8B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_32b_qwen_qwen3_8b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-32B_Qwen_Qwen3-8B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_4b_qwen_qwen3_1_7b">
+          <h2>Qwen_Qwen3-4B_Qwen_Qwen3-1.7B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_4b_qwen_qwen3_1_7b_counts.png" alt="Counts: Qwen_Qwen3-4B_Qwen_Qwen3-1.7B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_4b_qwen_qwen3_1_7b_proportions.png" alt="Proportions: Qwen_Qwen3-4B_Qwen_Qwen3-1.7B"><figcaption>Proportions</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_4b_qwen_qwen3_14b">
+          <h2>Qwen_Qwen3-4B_Qwen_Qwen3-14B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_4b_qwen_qwen3_14b_counts.png" alt="Counts: Qwen_Qwen3-4B_Qwen_Qwen3-14B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_4b_qwen_qwen3_14b_proportions.png" alt="Proportions: Qwen_Qwen3-4B_Qwen_Qwen3-14B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_4b_qwen_qwen3_14b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-4B_Qwen_Qwen3-14B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_4b_qwen_qwen3_32b">
+          <h2>Qwen_Qwen3-4B_Qwen_Qwen3-32B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_4b_qwen_qwen3_32b_counts.png" alt="Counts: Qwen_Qwen3-4B_Qwen_Qwen3-32B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_4b_qwen_qwen3_32b_proportions.png" alt="Proportions: Qwen_Qwen3-4B_Qwen_Qwen3-32B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_4b_qwen_qwen3_32b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-4B_Qwen_Qwen3-32B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_4b_qwen_qwen3_4b">
+          <h2>Qwen_Qwen3-4B_Qwen_Qwen3-4B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_4b_qwen_qwen3_4b_counts.png" alt="Counts: Qwen_Qwen3-4B_Qwen_Qwen3-4B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_4b_qwen_qwen3_4b_proportions.png" alt="Proportions: Qwen_Qwen3-4B_Qwen_Qwen3-4B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_4b_qwen_qwen3_4b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-4B_Qwen_Qwen3-4B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_4b_qwen_qwen3_8b">
+          <h2>Qwen_Qwen3-4B_Qwen_Qwen3-8B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_4b_qwen_qwen3_8b_counts.png" alt="Counts: Qwen_Qwen3-4B_Qwen_Qwen3-8B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_4b_qwen_qwen3_8b_proportions.png" alt="Proportions: Qwen_Qwen3-4B_Qwen_Qwen3-8B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_4b_qwen_qwen3_8b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-4B_Qwen_Qwen3-8B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_8b_qwen_qwen3_1_7b">
+          <h2>Qwen_Qwen3-8B_Qwen_Qwen3-1.7B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_8b_qwen_qwen3_1_7b_counts.png" alt="Counts: Qwen_Qwen3-8B_Qwen_Qwen3-1.7B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_8b_qwen_qwen3_1_7b_proportions.png" alt="Proportions: Qwen_Qwen3-8B_Qwen_Qwen3-1.7B"><figcaption>Proportions</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_8b_qwen_qwen3_14b">
+          <h2>Qwen_Qwen3-8B_Qwen_Qwen3-14B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_8b_qwen_qwen3_14b_counts.png" alt="Counts: Qwen_Qwen3-8B_Qwen_Qwen3-14B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_8b_qwen_qwen3_14b_proportions.png" alt="Proportions: Qwen_Qwen3-8B_Qwen_Qwen3-14B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_8b_qwen_qwen3_14b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-8B_Qwen_Qwen3-14B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_8b_qwen_qwen3_32b">
+          <h2>Qwen_Qwen3-8B_Qwen_Qwen3-32B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_8b_qwen_qwen3_32b_counts.png" alt="Counts: Qwen_Qwen3-8B_Qwen_Qwen3-32B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_8b_qwen_qwen3_32b_proportions.png" alt="Proportions: Qwen_Qwen3-8B_Qwen_Qwen3-32B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_8b_qwen_qwen3_32b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-8B_Qwen_Qwen3-32B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_8b_qwen_qwen3_4b">
+          <h2>Qwen_Qwen3-8B_Qwen_Qwen3-4B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_8b_qwen_qwen3_4b_counts.png" alt="Counts: Qwen_Qwen3-8B_Qwen_Qwen3-4B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_8b_qwen_qwen3_4b_proportions.png" alt="Proportions: Qwen_Qwen3-8B_Qwen_Qwen3-4B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_8b_qwen_qwen3_4b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-8B_Qwen_Qwen3-4B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+        <section id="qwen_qwen3_8b_qwen_qwen3_8b">
+          <h2>Qwen_Qwen3-8B_Qwen_Qwen3-8B</h2>
+          <div class="grid">
+            <figure><img src="counts/qwen_qwen3_8b_qwen_qwen3_8b_counts.png" alt="Counts: Qwen_Qwen3-8B_Qwen_Qwen3-8B"><figcaption>Counts</figcaption></figure><figure><img src="proportions/qwen_qwen3_8b_qwen_qwen3_8b_proportions.png" alt="Proportions: Qwen_Qwen3-8B_Qwen_Qwen3-8B"><figcaption>Proportions</figcaption></figure><figure><img src="chef/qwen_qwen3_8b_qwen_qwen3_8b_chef_clear.png" alt="Chef (clear only): Qwen_Qwen3-8B_Qwen_Qwen3-8B"><figcaption>Chef (clear only)</figcaption></figure>
+          </div>
+        </section>
+        
+</body>
+</html>
