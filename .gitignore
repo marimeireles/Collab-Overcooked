@@ -1,6 +1,5 @@
 src/openai_key.txt
 src/data
-src/eval_result
 qwen7b/
 src/data-clean
 to_run*.csv

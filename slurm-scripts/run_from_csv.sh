@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=final_for_real_
+#SBATCH --job-name=lvl-4-run
 #SBATCH --output=slurm/%j.log
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4GB
@@ -219,7 +219,7 @@ if [[ -z "$CSV_PATH" ]]; then
     echo "ERROR: No CSV specified. Pass a CSV path or set an index via argument/env/array (e.g., 13)." >&2
     exit 1
   fi
-  CSV_PATH="/nas/ucb/marimeireles/dev/Collab-Overcooked/final_for_real_${CSV_INDEX}.csv"
+  CSV_PATH="/nas/ucb/marimeireles/dev/Collab-Overcooked/lvl-4-run${CSV_INDEX}.csv"
 fi
 if [[ ! -f "$CSV_PATH" ]]; then
   echo "ERROR: CSV not found at $CSV_PATH" >&2
@@ -320,7 +320,7 @@ tail -n +2 "$CSV_PATH" | while IFS=, read -r model_pair recipe runs_needed; do
     if srun --nodes=1 --ntasks=1 --input=none python main.py \
             --order "${recipe_clean}" \
             --temperature 0.7 \
-            --file_prefix "final_for_real_" \
+            --file_prefix "lvl-4-run" \
             --p0_gpt_model "$p0_gpt_model" \
             --p1_gpt_model "$p1_gpt_model" \
             --p0_model_dirname "$p0_dir" \
