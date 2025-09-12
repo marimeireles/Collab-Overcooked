@@ -6,25 +6,11 @@ ROOT="${1:-/nas/ucb/marimeireles/dev/Collab-Overcooked/}"
 
 # Expected recipe directories (model subdirs do NOT include the numeric prefixes)
 expected_with_nums=(
-  "1_baked_bell_pepper"
-  "1_baked_sweet_potato"
-  "1_boiled_egg"
-  "1_boiled_mushroom"
-  "1_boiled_sweet_potato"
-  "2_boiled_potato_slices"
-  "2_boiled_green_bean_slices"
-  "2_boiled_corn_slices"
-  "2_baked_pumpkin_slices"
-  "3_baked_bell_pepper_soup"
-  "3_baked_carrot_soup"
-  "3_baked_mushroom_soup"
-  "3_baked_potato_soup"
-  "3_baked_pumpkin_soup"
-  "5_mashed_broccoli_and_bean_patty"
-  "5_mashed_carrot_and_chickpea_patty"
-  "5_mashed_cauliflower_and_lentil_patty"
-  "5_mashed_potato_and_pea_patty"
-  "5_mashed_sweet_potato_and_bean_patty"
+"4_sliced_bell_pepper_and_corn_stew"
+"4_sliced_bell_pepper_and_lentil_stew"
+"4_sliced_eggplant_and_chickpea_stew"
+"4_sliced_pumpkin_and_chickpea_stew"
+"4_sliced_zucchini_and_chickpea_stew"
 )
 
 # Generate Markdown

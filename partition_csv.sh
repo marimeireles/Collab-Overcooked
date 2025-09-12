@@ -5,7 +5,7 @@
 
 LINES_PER_CHUNK=3
 GLOBAL_COUNTER=1
-INPUT_CSV="final_for_real.csv"
+INPUT_CSV="lvl4-runs.csv"
 
 # Check if input file exists
 if [ ! -f "$INPUT_CSV" ]; then
@@ -38,7 +38,7 @@ tail -n +2 "$INPUT_CSV" | grep -v '^[[:space:]]*$' > "$TEMP_DATA_FILE"
 
 # Split the data into chunks
 for (( i=1; i<=CHUNKS_NEEDED; i++ )); do
-    OUTPUT_FILE="final_for_real_${GLOBAL_COUNTER}.csv"
+    OUTPUT_FILE="lvl-4-run${GLOBAL_COUNTER}.csv"
     
     # Calculate start and end lines for this chunk
     START_LINE=$(( (i-1) * LINES_PER_CHUNK + 1 ))
@@ -64,5 +64,5 @@ rm "$TEMP_DATA_FILE"
 echo "  - Finished processing $INPUT_CSV"
 echo
 echo "Partitioning complete!"
-echo "Created $(($GLOBAL_COUNTER - 1)) files: final_for_real_1.csv to final_for_real_$(($GLOBAL_COUNTER - 1)).csv"
+echo "Created $(($GLOBAL_COUNTER - 1)) files: lvl-4-run1.csv to lvl-4-run$(($GLOBAL_COUNTER - 1)).csv"
 
